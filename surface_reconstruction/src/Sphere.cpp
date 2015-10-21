@@ -1,3 +1,5 @@
+/////////////////////
+
 #include "Sphere.h"
 
 using namespace Eigen;
@@ -147,7 +149,7 @@ void Sphere::setTransformationMatrix(const Eigen::Matrix4f& transfo, Face* face)
     Vector4f tmp = this->getTransformationMatrix()*Vector4f(0,0,0,1);
     mCenter=Vector3f(tmp[0],tmp[1],tmp[2]);
 
-    containPoint(face);
+    //containPoint(face);
 }
 
 float Sphere::calcDistance(Vector3f v1, Vector3f v2)
@@ -163,8 +165,7 @@ float Sphere::calcDistance(Vector3f v1, Vector3f v2)
 }
 
 
-
-void Sphere::containPoint(Face* face)
+bool Sphere::containPoint(Face* face)
 {
 
     std::vector<Vector3f> stockPos;
@@ -213,11 +214,13 @@ void Sphere::containPoint(Face* face)
 
         }
 
-        std::cout<<"triangle built !"<< std::endl;
+        //std::cout<<"triangle built !"<< std::endl;
 
         giveVertices(face,stockPos[0],stockDist[0],stockDist[1]);
+        return true;
     }
-
+    else
+        return false;
 
 
 }
@@ -237,6 +240,29 @@ void Sphere::giveVertices(Face* face, Vector3f pos1, Vector3f pos2, Vector3f pos
 
 }
 
+void Sphere::firstPos(Face* face)
+{
+    for (int i=0; i<mPositions.size();i++)
+    {
+        Affine3f transform(Translation3f(this->mPositions[i]));
+        this->setTransformationMatrix(transform.matrix(),face);
+
+        if(containPoint(face))
+            return;
+    }
+}
+
+void Sphere::buildSurface(Face* face)
+{
+   // Affine3f transform(Translation3f(this->mPositions[0]));
+
+   // this->setTransformationMatrix(transform.matrix(),face);
+
+    //containPoint(face);
+
+    firstPos(face);
+
+}
 
 void Sphere::draw() const
 {

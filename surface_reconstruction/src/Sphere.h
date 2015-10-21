@@ -9,15 +9,17 @@
 class Sphere : public ShapeS {
 
 public:
-    Sphere(PointCloud const * const pc, float radius=0.05f, int nU=40, int nV=40);
+    Sphere(PointCloud const * const pc, float radius=0.1f, int nU=40, int nV=40);
     ~Sphere();
     void init(const Shader *shader);
     void draw() const;
     float radius() const { return mRadius; }
     void setTransformationMatrix(const Eigen::Matrix4f& transfo, Face *face);
-    void containPoint(Face *face);
+    bool containPoint(Face *face);
     void giveVertices(Face *face, Eigen::Vector3f pos1, Eigen::Vector3f pos2, Eigen::Vector3f pos3);
     float calcDistance(Eigen::Vector3f pos1, Eigen::Vector3f pos2);
+    void buildSurface(Face *face);
+    void firstPos(Face* face);
 
     std::vector<Eigen::Vector3f> mPositions;
 

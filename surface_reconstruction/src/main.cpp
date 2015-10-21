@@ -51,7 +51,20 @@ float tx=0;
 float ty=0;
 float tz=0;
 
-Vector3f sphereCenter(tx,ty,tz);
+float rx=0;
+///////////////////////////////
+
+Eigen::Affine3f create_rotation_matrix(float ax, float ay, float az) {
+  Eigen::Affine3f rx =
+      Eigen::Affine3f(Eigen::AngleAxisf(ax, Eigen::Vector3f(1, 0, 0)));
+  Eigen::Affine3f ry =
+      Eigen::Affine3f(Eigen::AngleAxisf(ay, Eigen::Vector3f(0, 1, 0)));
+  Eigen::Affine3f rz =
+      Eigen::Affine3f(Eigen::AngleAxisf(az, Eigen::Vector3f(0, 0, 1)));
+  return rz * ry * rx;
+}
+
+//////////////////////////////
 
 /** This method needs to be called once the GL context has been created by GLFW.
   * It is called only once per execution */
@@ -70,7 +83,6 @@ void initGL()
 
     //PointCloud
     pc = new PointCloud();
-    //pc->load(PGHP_DIR"/data/trois_points.asc");
     //pc->load(PGHP_DIR"/data/decimate.asc");
     pc->load(PGHP_DIR"/data/sunglasses_lens.asc");
     pc->makeUnitary();
@@ -254,10 +266,28 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         else if(key == GLFW_KEY_C)
         {
             //test
-
+            //Affine3f transform(Translation3f(Vector3f(0.5,0,0)));
             Affine3f transform(Translation3f(sphere->mPositions[0]));
+
             sphere->setTransformationMatrix(transform.matrix(),face);
+            /*rx++;
+            tx+=0.1;
+            Eigen::Affine3f r = create_rotation_matrix(rx, 1.0, 1.0);
+            Eigen::Affine3f t(Eigen::Translation3f(Eigen::Vector3f(0.5,0,0)));
+
+            Eigen::Matrix4f m = (r *t ).matrix();
+
+            sphere->setTransformationMatrix(m,face);*/
+
         }
+        else if(key == GLFW_KEY_X)
+        {
+
+            //test
+            sphere->buildSurface(face);
+
+        }
+
 
 
 

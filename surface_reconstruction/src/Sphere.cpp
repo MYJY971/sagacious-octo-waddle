@@ -149,7 +149,7 @@ void Sphere::setTransformationMatrix(const Eigen::Matrix4f& transfo, Face* face)
     Vector4f tmp = this->getTransformationMatrix()*Vector4f(0,0,0,1);
     mCenter=Vector3f(tmp[0],tmp[1],tmp[2]);
 
-    //containPoint(face);
+    containPoint(face);
 }
 
 float Sphere::calcDistance(Vector3f v1, Vector3f v2)
@@ -184,7 +184,7 @@ bool Sphere::containPoint(Face* face)
             stockPos.push_back(mPositions[i]);
             /*std::cout<< "(" << mPositions[i][0] << "," << mPositions[i][1] << "," << mPositions[i][2] <<
                         ") is inside !!" << std::endl << std::endl ;*/
-            std::cout<< "is inside !!" <<stockPos.size()<< std::endl << std::endl ;
+//            std::cout<< "is inside !!" <<stockPos.size()<< std::endl << std::endl ;
 
         }
 

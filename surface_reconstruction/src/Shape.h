@@ -1,6 +1,7 @@
 #ifndef _SHAPE_H
 #define _SHAPE_H
 
+#include"common.h"
 #include "Shader.h"
 
 #include <eigen3/Eigen/Geometry>

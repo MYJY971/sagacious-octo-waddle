@@ -242,6 +242,11 @@ bool Ball::containPoint(Surface *surface)
         {
             giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
             surface->setFace(f);
+            Vector3f m=f->getBiggestEdge()->getMiddle();
+            if(m.norm()>mCenter.norm())
+                diamRot=m-mCenter;
+            else
+                diamRot=mCenter-m;
 
             return true;
         }
@@ -295,6 +300,7 @@ void Ball::firstPos(Surface *surface)
 void Ball::buildSurface(Surface *surface)
 {
 
+
     if(surface->mFaces.size()==0)
         firstPos(surface);
     else
@@ -309,14 +315,20 @@ void Ball::buildSurface(Surface *surface)
 
             angle-=0.1;
 
-            float d=calcDistance(mCenter,axeRot);
+            //float d=calcDistance(mCenter,axeRot);
             Affine3f r=create_rotation_mat(0.0,0.0,angle);
             Affine3f t(Translation3f(this->axeRot));
-            Affine3f tr(Translation3f(this->mCenter));
+
+            Vector3f d;
+//            if (c.norm()>axeRot.norm())
+//                    diamRot=c-axeRot;
+//            else
+//                diamRot=axeRot-c;
+            Affine3f tr(Translation3f(this->diamRot));
             //Affine3f transform(Translation3f(this->mPositions[0]));
             //this->setTransformationMatrix(transform,surface);
-            this->setTransformationMatrix(t*r,surface);
-            //containPoint(surface);
+            this->setTransformationMatrix(t*r*tr,surface);
+            containPoint(surface);
 
           }
       //}

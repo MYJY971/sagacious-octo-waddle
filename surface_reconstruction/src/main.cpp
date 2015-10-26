@@ -299,6 +299,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
             //test
             ball->buildSurface(surface);
+            surface->init(&mSimple);
 
         }
 

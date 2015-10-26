@@ -24,7 +24,10 @@ public:
 
     std::vector<Eigen::Vector3f> mPositions;
     Eigen::Vector3f axeRot;
+    Eigen::Vector3f diamRot;
+    Eigen::Vector3f mC;
     float angle;
+
 
 private :
     GLuint _vao;

@@ -4,27 +4,7 @@
 
 #include <vector>
 #include "Pointcloud.h"
-
-
-class Edge
-{
-public:
-    Edge(Eigen::Vector3f A, Eigen::Vector3f B);
-
-    float getLenght();
-    bool equal(Edge E);
-    Eigen::Vector3f getP1();
-    Eigen::Vector3f getP2();
-
-
-private:
-    Eigen::Vector3f p1;
-    Eigen::Vector3f p2;
-    float lenght;
-
-
-friend class Surface;
-};
+#include "Face.h"
 
 
 class Surface : public PointCloud
@@ -35,10 +15,11 @@ public:
 
     void init(const Shader *shader);
     void draw() const;
-    void setPos(Eigen::Vector3f pos1);
-    void setData(Eigen::Vector3f pos1);
+    void setFace(Face* face);
+    void setPos(Eigen::Vector3f pos1, Eigen::Vector3f n);
 
-    std::vector<Edge> mEdges;
+    //std::vector<Edge> mEdges;
+    std::vector<Face> mFaces;
 
 private:
     GLuint mBufs[4];

@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include <eigen3/Eigen/Geometry>
+
 using namespace Eigen;
 
 #include "Shader.h"
@@ -42,6 +43,8 @@ PointCloud* pc;
 //Octree Debug
 Octree* octree;
 WireCube* wirecube;
+
+//Ball Pivoting
 Ball* ball;
 Surface* surface;
 
@@ -85,6 +88,7 @@ void initGL()
     //PointCloud
     pc = new PointCloud();
     //pc->load(PGHP_DIR"/data/decimate.asc");
+    //pc->load(PGHP_DIR"/data/decimateRed.asc");
     pc->load(PGHP_DIR"/data/sunglasses_lens.asc");
     pc->makeUnitary();
     pc->init(&mBlinn);
@@ -143,21 +147,23 @@ void render(GLFWwindow* window)
      glUniform3f(mBlinn.getUniformLocation("colorV"),1.f,1.f,1.f);
         ball->draw();
      glUniform3f(mBlinn.getUniformLocation("colorV"),0.2,0.3,0.8);
-    mSimple.activate();
+
+     mSimple.activate();
 
 
-
-         glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false, surface->getTransformationMatrix().data());
-       // glUniform3f(mBlinn.getUniformLocation("colorV"),1.,1.,1.);
-         surface->draw();
+       glUniformMatrix4fv(mSimple.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
+       glUniformMatrix4fv(mSimple.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
+       glUniformMatrix4fv(mSimple.getUniformLocation("object_matrix"),1,false, surface->getTransformationMatrix().data());
+        glUniform3f(mSimple.getUniformLocation("color"),1.,0.,0.);
+       surface->draw();
        // glUniform3f(mBlinn.getUniformLocation("colorV"),0.2,0.3,0.8);
 
 
     if(octreeVisu >= 0)
     {
         //mSimple.activate();
-        glUniformMatrix4fv(mSimple.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
-        glUniformMatrix4fv(mSimple.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
+//        glUniformMatrix4fv(mSimple.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
+//        glUniformMatrix4fv(mSimple.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
         std::vector<AlignedBox3f> aabbs = octree->getAABBs(octreeVisu);
         for(unsigned i=0; i<aabbs.size(); ++i)
         {
@@ -276,20 +282,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         else if(key == GLFW_KEY_C)
         {
             //test
-            //Affine3f transform(Translation3f(Vector3f(0.5,0,0)));
-            Affine3f transform(Translation3f(ball->mPositions[0]));
+            Affine3f transform(Translation3f(Vector3f(0.5,0,0)));
 
-            ball->setTransformationMatrix(transform.matrix(),surface);
+            rx+=0.1;
 
+            Affine3f t(Translation3f(0.1,0.0,0));
 
-            /*rx++;
-            tx+=0.1;
-            Eigen::Affine3f r = create_rotation_matrix(rx, 1.0, 1.0);
-            Eigen::Affine3f t(Eigen::Translation3f(Eigen::Vector3f(0.5,0,0)));
+            Affine3f r=create_rotation_matrix(0.0,0.0,rx);
 
-            Eigen::Matrix4f m = (r *t ).matrix();
+            ball->setTransformationMatrix(transform*r*t,surface);
 
-            ball->setTransformationMatrix(m,surface);*/
 
         }
         else if(key == GLFW_KEY_X)
@@ -302,7 +304,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 
 
-
     }
 
     if(action == GLFW_REPEAT) {
@@ -310,47 +311,47 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         {
             tx+=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
 
         }
         else if(key == GLFW_KEY_LEFT)
         {
             tx-=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
 
         }
         else if(key == GLFW_KEY_UP)
         {
             ty+=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
 
         }
         else if(key == GLFW_KEY_DOWN)
         {
             ty-=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
 
         }
         else if(key == GLFW_KEY_W)//Z on Azerty
         {
             tz+=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
         }
         else if(key == GLFW_KEY_S)
         {
             tz-=0.01f;
             Affine3f transform(Translation3f(tx,ty,tz));
-            ball->setTransformationMatrix(transform.matrix(),surface);
-            surface->init(&mBlinn);
+            ball->setTransformationMatrix(transform,surface);
+            surface->init(&mSimple);
 
         }
     }

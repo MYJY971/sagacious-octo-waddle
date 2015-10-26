@@ -2,6 +2,22 @@
 
 using namespace Eigen;
 
+
+
+Eigen::Affine3f create_rotation_mat(float ax, float ay, float az) {
+  Eigen::Affine3f rx =
+      Eigen::Affine3f(Eigen::AngleAxisf(ax, Eigen::Vector3f(1, 0, 0)));
+  Eigen::Affine3f ry =
+      Eigen::Affine3f(Eigen::AngleAxisf(ay, Eigen::Vector3f(0, 1, 0)));
+  Eigen::Affine3f rz =
+      Eigen::Affine3f(Eigen::AngleAxisf(az, Eigen::Vector3f(0, 0, 1)));
+  return rz * ry * rx;
+}
+
+
+
+
+
 Ball::Ball(const PointCloud * const pc, float radius, int nU, int nV) :
     mRadius(radius)
 {
@@ -89,7 +105,7 @@ Ball::~Ball()
 
 void Ball::init(Shader *shader)
 {
-
+    angle=0;
     currentShader = shader;
     glGenVertexArrays(1, &_vao);
     glGenBuffers(6, _bufs);
@@ -141,13 +157,13 @@ void Ball::init(Shader *shader)
     mReady = true;
 }
 
-void Ball::setTransformationMatrix(const Eigen::Matrix4f& transfo, Surface *surface)
+void Ball::setTransformationMatrix(const Eigen::Affine3f& transfo, Surface *surface)
 {
     mTransformation = transfo;
     Vector4f tmp = this->getTransformationMatrix()*Vector4f(0,0,0,1);
     mCenter=Vector3f(tmp[0],tmp[1],tmp[2]);
 
-    containPoint(surface);
+    //containPoint(surface);
 }
 
 float Ball::calcDistance(Vector3f v1, Vector3f v2)
@@ -162,6 +178,11 @@ float Ball::calcDistance(Vector3f v1, Vector3f v2)
     return distance;
 }
 
+
+float Ball::getRadius()
+{
+    return mRadius;
+}
 
 bool Ball::containPoint(Surface *surface)
 {
@@ -214,8 +235,29 @@ bool Ball::containPoint(Surface *surface)
 
         //std::cout<<"triangle built !"<< std::endl;
 
-        giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
-        return true;
+        Face * f = new Face(stockPos[0],stockDist[0],stockDist[1]);
+
+
+        if(surface->mFaces.size()==0)
+        {
+            giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
+            surface->setFace(f);
+
+            return true;
+        }
+        else
+            {
+                if(f->equal(surface->mFaces[0]))
+                    return false;
+                else
+                {
+                    giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
+                    surface->setFace(f);
+
+                    return true;
+                }
+             }
+
     }
     else
         return false;
@@ -225,25 +267,25 @@ bool Ball::containPoint(Surface *surface)
 
 void Ball::giveVertices(Surface* surface, Vector3f pos1, Vector3f pos2, Vector3f pos3)
 {
-/* Vector3f v1(0.5,0,0);
- Vector3f v2(-0.5,0,0);
- Vector3f v3(0,0.5,0);
 
- //face->setPos(v1,v2,v3);*/
- surface->setPos(pos1);
- surface->setPos(pos2);
- surface->setPos(pos3);
- //face->setData(v2);
- //face->setData(v3);
+ surface->setPos(pos1,Vector3f(1,1,1));
+ surface->setPos(pos2,Vector3f(1,1,1));
+ surface->setPos(pos3,Vector3f(1,1,1));
+
+// Face* f = new Face(pos1,pos2,pos3);
+// surface->setFace(f);
+ //surface->setFace(Face face(pos1,pos2,pos3));
 
 }
+
+
 
 void Ball::firstPos(Surface *surface)
 {
     for (int i=0; i<mPositions.size();i++)
     {
         Affine3f transform(Translation3f(this->mPositions[i]));
-        this->setTransformationMatrix(transform.matrix(),surface);
+        this->setTransformationMatrix(transform,surface);
 
         if(containPoint(surface))
             return;
@@ -252,13 +294,32 @@ void Ball::firstPos(Surface *surface)
 
 void Ball::buildSurface(Surface *surface)
 {
-   // Affine3f transform(Translation3f(this->mPositions[0]));
 
-   // this->setTransformationMatrix(transform.matrix(),face);
+    if(surface->mFaces.size()==0)
+        firstPos(surface);
+    else
+    {
+        //while(containPoint(surface)==false)
+        //{
+            Face f=surface->mFaces.back();
 
-    //containPoint(face);
+            Edge* e=f.getBiggestEdge();
 
-    firstPos(surface);
+            axeRot=e->getMiddle();
+
+            angle-=0.1;
+
+            float d=calcDistance(mCenter,axeRot);
+            Affine3f r=create_rotation_mat(0.0,0.0,angle);
+            Affine3f t(Translation3f(this->axeRot));
+            Affine3f tr(Translation3f(this->mCenter));
+            //Affine3f transform(Translation3f(this->mPositions[0]));
+            //this->setTransformationMatrix(transform,surface);
+            this->setTransformationMatrix(t*r,surface);
+            //containPoint(surface);
+
+          }
+      //}
 
 }
 

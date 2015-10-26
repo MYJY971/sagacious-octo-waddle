@@ -1,30 +1,42 @@
 #ifndef FACE_H
 #define FACE_H
 
-#include "ShapeS.h"
 #include <vector>
+#include <eigen3/Eigen/Geometry>
+#include "Edge.h"
+#include "Pointcloud.h"
 
-class Face : public ShapeS
+class Face :public PointCloud
 {
 public:
-    Face();
-    ~Face();
+    Face(Eigen::Vector3f A, Eigen::Vector3f B, Eigen::Vector3f C);
 
-    void init(const Shader *shader);
-    void draw() const;
-    void setPos(Eigen::Vector3f pos1);
-    void setData(Eigen::Vector3f pos1);
+    float getArea();
+    bool equal(Face F);
+    Eigen::Vector3f getA();
+    Eigen::Vector3f getB();
+    Eigen::Vector3f getC();
+    Edge* getBiggestEdge();
 
+
+     Eigen::Vector3f pA;
+     Eigen::Vector3f pB;
+     Eigen::Vector3f pC;
+
+     Edge* AB;
+     Edge* BC;
+     Edge* CA;
 private:
-    GLuint mBufs[4];
-    GLuint mVAO;
-    std::vector<int>        mIndices;   /** vertex indices */
-    std::vector<Eigen::Vector3f>	mVertices;  /** 3D positions */
-    std::vector<Eigen::Vector3f>	mColors;    /** colors */
-    std::vector<Eigen::Vector3f>	mNormals;   /** 3D normals */
+//    Eigen::Vector3f pA;
+//    Eigen::Vector3f pB;
+//    Eigen::Vector3f pC;
 
-protected:
-    bool mReady;
+//    Edge AB;
+//    Edge BC;
+//    Edge CA;
+    float area;
+
+
 };
 
 #endif // FACE_H

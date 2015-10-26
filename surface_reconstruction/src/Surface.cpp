@@ -1,44 +1,7 @@
 #include "Surface.h"
-
+#include "Face.h"
 using namespace Eigen;
 
-
-
-//Edge
-Edge::Edge(Vector3f A, Vector3f B)
-{
-    p1=A;
-    p2=B;
-    lenght=getLenght();
-}
-
-float Edge::getLenght(){
-    float dx = p2[0]-p1[0];
-    float dy = p2[1]-p1[1];
-    float dz = p2[2]-p1[2];
-
-    float distance2 = dx*dx +dy*dy +dz*dz;
-    float distance  = sqrt(distance2);
-
-    return distance;
-}
-
-Vector3f Edge::getP1()
-{
-    return p1;
-}
-
-Vector3f Edge::getP2()
-{
-    return p2;
-}
-
-bool Edge::equal(Edge E){
-    if ((p1==E.getP1() && p2==E.getP2()) || (p1==E.getP2() && p2==E.getP1()) )
-        return true;
-    else
-        return false;
-}
 
 Surface::Surface()
 {
@@ -96,20 +59,26 @@ void Surface::init(const Shader *shader)
 
 }
 
-void Surface::setPos(Vector3f pos1)
+void Surface::setPos(Vector3f pos1, Vector3f n)
 {
 
     mVertices.push_back(pos1);
+    mNormals.push_back(n);
     mIndices.push_back(mIndices.size());
 
 
 }
 
-void Surface::setData(Vector3f pos1)
+void Surface::setFace(Face *face)
 {
-
+    mFaces.push_back(*face);
+//    Vector3f v0=face->getA();
+//    mVertices.push_back(face->pA);
+//    mVertices.push_back(face->pB);
+//    mVertices.push_back(face->pC);
+//    //mNormals.push_back(n);
+//    mIndices.push_back(mIndices.size());
 }
-
 
 
 void Surface::draw() const

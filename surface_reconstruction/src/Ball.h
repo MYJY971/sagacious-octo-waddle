@@ -5,6 +5,7 @@
 #include "Pointcloud.h"
 #include "Surface.h"
 
+
 class Ball : public PointCloud {
 
 public:
@@ -13,14 +14,17 @@ public:
     void init(Shader *shader);
     void draw();
     float radius() const { return mRadius; }
-    void setTransformationMatrix(const Eigen::Matrix4f& transfo, Surface *surface);
+    void setTransformationMatrix(const Eigen::Affine3f& transfo, Surface *surface);
     bool containPoint(Surface *surface);
     void giveVertices(Surface *surface, Eigen::Vector3f pos1, Eigen::Vector3f pos2, Eigen::Vector3f pos3);
     float calcDistance(Eigen::Vector3f pos1, Eigen::Vector3f pos2);
     void buildSurface(Surface *surface);
     void firstPos(Surface* surface);
+    float getRadius();
 
     std::vector<Eigen::Vector3f> mPositions;
+    Eigen::Vector3f axeRot;
+    float angle;
 
 private :
     GLuint _vao;

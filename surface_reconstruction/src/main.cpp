@@ -284,7 +284,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             //test
             Affine3f transform(Translation3f(Vector3f(0.5,0,0)));
 
-            rx+=0.1;
+            rx+=M_PI;
 
             Affine3f t(Translation3f(0.1,0.0,0));
 

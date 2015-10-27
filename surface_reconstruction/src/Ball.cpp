@@ -190,6 +190,7 @@ bool Ball::containPoint(Surface *surface)
     std::vector<Vector3f> stockPos;
     std::vector<Vector3f> stockDist;
 
+
     //float normCenter = mCenter.norm();
     for (int i=0; i<mPositions.size();++i )
     {
@@ -201,9 +202,8 @@ bool Ball::containPoint(Surface *surface)
         {
 
             stockPos.push_back(mPositions[i]);
-            /*std::cout<< "(" << mPositions[i][0] << "," << mPositions[i][1] << "," << mPositions[i][2] <<
-                        ") is inside !!" << std::endl << std::endl ;*/
-//            std::cout<< "is inside !!" <<stockPos.size()<< std::endl << std::endl ;
+
+            //std::cout<< "is inside !!" <<stockPos.size()<< std::endl << std::endl ;
 
         }
 
@@ -214,32 +214,32 @@ bool Ball::containPoint(Surface *surface)
 
     if (stockPos.size()>=3)
     {
-        float maxDist =0.0;
-        for (int i=1; i<stockPos.size();++i)
-        {
-            float dist = calcDistance(stockPos[0],stockPos[i]);
-
-            if (dist>=maxDist)
-            {
-                maxDist=dist;
-                stockDist.insert(stockDist.begin(),stockPos[i]);
-            }
-            else if ( (stockDist.size()>=2) && (dist>calcDistance(stockPos[0],stockDist[1])))
-            {
-                stockDist.insert(stockDist.begin()+1,stockPos[i]);
-            }
-            else
-                stockDist.push_back(stockPos[i]);
-
-        }
-
-        //std::cout<<"triangle built !"<< std::endl;
-
-        Face * f = new Face(stockPos[0],stockDist[0],stockDist[1]);
-
 
         if(surface->mFaces.size()==0)
         {
+            float maxDist =0.0;
+            for (int i=1; i<stockPos.size();++i)
+            {
+                float dist = calcDistance(stockPos[0],stockPos[i]);
+
+                if (dist>=maxDist)
+                {
+                    maxDist=dist;
+                    stockDist.insert(stockDist.begin(),stockPos[i]);
+                }
+                else if ( (stockDist.size()>=2) && (dist>calcDistance(stockPos[0],stockDist[1])))
+                {
+                    stockDist.insert(stockDist.begin()+1,stockPos[i]);
+                }
+                else
+                    stockDist.push_back(stockPos[i]);
+
+            }
+
+            //std::cout<<"triangle built !"<< std::endl;
+
+            Face * f = new Face(stockPos[0],stockDist[0],stockDist[1]);
+
             giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
             surface->setFace(f);
             Vector3f m=f->getBiggestEdge()->getMiddle();
@@ -252,15 +252,69 @@ bool Ball::containPoint(Surface *surface)
         }
         else
             {
-                if(f->equal(surface->mFaces[0]))
-                    return false;
-                else
-                {
-                    giveVertices(surface,stockPos[0],stockDist[0],stockDist[1]);
-                    surface->setFace(f);
+                Face lastFace=surface->mFaces.back();
+                bool b1 = false;
 
-                    return true;
-                }
+                if(b1==false)
+                {
+                    for(int numEdge=0; numEdge<3; numEdge++)
+                    {
+                        Vector3f p0 = lastFace.mEdges[numEdge]->p1 ;
+                        Vector3f p1 = lastFace.mEdges[numEdge]->p2 ;
+
+                        for (int i=1; i<stockPos.size();++i)
+                        {
+                            if((stockPos[i]!=p0) && (stockPos[i]!=p1))
+                                stockDist.push_back(stockPos[i]);
+                        }
+
+
+                        Face * f;
+                        bool bol=false;
+                        for (int i=0; i<stockDist.size();i++)
+                        {
+                            f= new Face(p0,p1,stockDist[i]);
+
+                            for (int j=0; j<surface->mFaces.size();j++)
+                            {
+                                if(f->equal(surface->mFaces[j])==false)
+                                {
+                                b1=true;
+
+                                giveVertices(surface,p0,p1,stockDist[0]);
+
+                                surface->setFace(f);
+
+                                Vector3f m=f->getBiggestEdge()->getMiddle();
+
+                                if(m.norm()>mCenter.norm())
+                                    diamRot=m-mCenter;
+                                else
+                                    diamRot=mCenter-m;
+
+                                i=stockDist.size();
+                                }
+
+                            }
+
+
+                        }
+                    }
+                 }
+
+                  if(b1)
+                  {
+//                      giveVertices(surface,p0,p1,stockDist[0]);
+//                      surface->setFace(f);
+//                      Vector3f m=f->getBiggestEdge()->getMiddle();
+//                      if(m.norm()>mCenter.norm())
+//                          diamRot=m-mCenter;
+//                      else
+//                          diamRot=mCenter-m;
+
+                      return true;
+                  }
+
              }
 
     }
@@ -313,7 +367,7 @@ void Ball::buildSurface(Surface *surface)
 
             axeRot=e->getMiddle();
 
-            angle-=0.1;
+            angle+=M_PI/2;
 
             //float d=calcDistance(mCenter,axeRot);
             Affine3f r=create_rotation_mat(0.0,0.0,angle);

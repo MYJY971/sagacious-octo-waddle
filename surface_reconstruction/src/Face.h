@@ -26,6 +26,8 @@ public:
      Edge* AB;
      Edge* BC;
      Edge* CA;
+
+     std::vector<Edge*> mEdges;
 private:
 //    Eigen::Vector3f pA;
 //    Eigen::Vector3f pB;

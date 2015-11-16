@@ -1,0 +1,4 @@
+/home/myjy/work/modelGeo/sagacious-octo-waddle/TD5-6/build-TD5/SOIL/CMakeFiles/SOIL.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/TD5-6/build-TD5/CMakeFiles/glViewer.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/TD5-6/build-TD5/glfw/src/CMakeFiles/glfw.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/TD5-6/build-TD5/glfw/CMakeFiles/uninstall.dir

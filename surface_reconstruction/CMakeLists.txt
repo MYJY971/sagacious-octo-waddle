@@ -32,6 +32,8 @@ set(pghp_SRCS
     src/Octree.cpp
     src/Sphere.cpp
     src/Face.cpp
+    src/Ball.cpp
+    src/Surface.cpp
     src/main.cpp
     glfw/deps/glad.c
 )

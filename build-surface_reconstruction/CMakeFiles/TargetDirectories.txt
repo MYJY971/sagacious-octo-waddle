@@ -1,0 +1,4 @@
+/home/myjy/work/modelGeo/sagacious-octo-waddle/build-surface_reconstruction/SOIL/CMakeFiles/SOIL.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/build-surface_reconstruction/CMakeFiles/glViewer.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/build-surface_reconstruction/glfw/src/CMakeFiles/glfw.dir
+/home/myjy/work/modelGeo/sagacious-octo-waddle/build-surface_reconstruction/glfw/CMakeFiles/uninstall.dir

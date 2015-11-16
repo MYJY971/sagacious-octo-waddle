@@ -17,6 +17,7 @@ using namespace Eigen;
 #include "Octree.h"
 #include "WireCube.h"
 #include "Mesh.h"
+#include "Meshloader.h"
 
 // initial window size
 int WIDTH = 640;
@@ -38,13 +39,13 @@ int mButton = -1;
 //Point Cloud Object
 PointCloud* pc;
 
+//Mesh
+Mesh* mesh;
+
 //Octree Debug
 Octree* octree;
 WireCube* wirecube;
 int octreeVisu = 0;
-
-//Mesh
-Mesh* mesh;
 
 /** This method needs to be called once the GL context has been created by GLFW.
   * It is called only once per execution */
@@ -66,16 +67,16 @@ void initGL()
     pc->makeUnitary();
     pc->init(&mBlinn);
 
+    //Mesh
+    mesh = new Mesh();
+    mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
+    mesh->makeUnitary();
+    mesh->init(&mBlinn);
+
     //Octree
     octree = new Octree(pc,15,10);
     wirecube = new WireCube();
     wirecube->init(&mSimple);
-
-    //Mesh
-    mesh=new Mesh();
-    mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
-    mesh->makeUnitary();
-    mesh->init(&mBlinn);
 
     mCamera.setSceneCenter(Vector3f(0.0,0.0,0.0));
     mCamera.setSceneDistance(4);
@@ -95,31 +96,20 @@ void render(GLFWwindow* window)
     //Draw PointCloud
     mBlinn.activate();
 
-//    glUniformMatrix4fv(mBlinn.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
-//    glUniformMatrix4fv(mBlinn.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
-//    Vector4f light_pos;
-//    light_pos << mLightPos , 1.0f;
-//    glUniform4fv(mBlinn.getUniformLocation("light_pos"),1,light_pos.data());
-
-//    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,pc->getTransformationMatrix().data());
-//    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*pc->getTransformationMatrix()).linear().inverse().transpose();
-//    glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
-
-//    pc->draw(&mBlinn);
-
-    //Draw Mesh
     glUniformMatrix4fv(mBlinn.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
     glUniformMatrix4fv(mBlinn.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
     Vector4f light_pos;
     light_pos << mLightPos , 1.0f;
     glUniform4fv(mBlinn.getUniformLocation("light_pos"),1,light_pos.data());
 
-    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,mesh->getTransformationMatrix().data());
-    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*mesh->getTransformationMatrix()).linear().inverse().transpose();
+    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,pc->getTransformationMatrix().data());
+    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*pc->getTransformationMatrix()).linear().inverse().transpose();
     glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
     mesh->draw(&mBlinn);
+    pc->draw(&mBlinn);
 
+    //mesh->draw(&mBlinn,false);
 
     //Draw Octree
     if(octreeVisu >= 0)

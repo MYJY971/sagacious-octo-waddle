@@ -6,7 +6,7 @@ uniform vec4 light_pos;
 
 in vec3 vertexV;
 in vec3 normalV;
-uniform vec3 colorV = vec3(0.2,0.3,0.8);
+uniform vec3 colorV = vec3(1.,0.,1.);
 
 out vec4 out_color;
 

@@ -10,6 +10,7 @@
 #include <eigen3/Eigen/Geometry>
 using namespace Eigen;
 
+
 #include "Shader.h"
 #include "Trackball.h"
 #include "Mesh.h"
@@ -18,7 +19,9 @@ using namespace Eigen;
 #include "WireCube.h"
 #include "Mesh.h"
 #include "Meshloader.h"
+#include <surface_mesh/surface_mesh.h>
 
+using namespace surface_mesh;
 // initial window size
 int WIDTH = 640;
 int HEIGHT = 480;
@@ -70,6 +73,7 @@ void initGL()
     //Mesh
     mesh = new Mesh();
     mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
+    //mesh->load(PGHP_DIR"/data/cubetest.obj");
     mesh->makeUnitary();
     mesh->init(&mBlinn);
 
@@ -102,12 +106,12 @@ void render(GLFWwindow* window)
     light_pos << mLightPos , 1.0f;
     glUniform4fv(mBlinn.getUniformLocation("light_pos"),1,light_pos.data());
 
-    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,pc->getTransformationMatrix().data());
-    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*pc->getTransformationMatrix()).linear().inverse().transpose();
+    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,/*pc*/mesh->getTransformationMatrix().data());
+    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*/*pc*/mesh->getTransformationMatrix()).linear().inverse().transpose();
     glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
     mesh->draw(&mBlinn);
-    pc->draw(&mBlinn);
+    //pc->draw(&mBlinn);
 
     //mesh->draw(&mBlinn,false);
 
@@ -126,6 +130,7 @@ void render(GLFWwindow* window)
             wirecube->draw(&mSimple);
         }
     }
+    mesh->drawEdges(&mSimple);
 
     // check OpenGL errors
     GL_TEST_ERR;
@@ -213,6 +218,76 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             pc->init(&mBlinn);
 
             std::cout << "ending number of points " << pc->numPoints() << std::endl;
+        }
+        else if(key == GLFW_KEY_X)
+        {
+
+            std::cout<<"debut test"<<std::endl;
+            Surface_mesh mHalfEdge=mesh->mHalfEdge;
+
+            Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
+            Surface_mesh::Vertex_property<Point> normals = mHalfEdge.get_vertex_property<Point>("v:normal");
+
+            Surface_mesh::Face lf;
+            Surface_mesh::Face rf;
+
+            Surface_mesh::Vertex vert0;
+            Surface_mesh::Vertex vert1;
+
+
+            Vector3f v0;
+            Vector3f v1;
+
+            Vector3f n0;
+            Vector3f n1;
+
+            Surface_mesh::Edge_iterator eit;
+
+            for(eit=mHalfEdge.edges_begin(); eit!=mHalfEdge.edges_end(); ++eit)
+//            for(int i=0; i<10000; i++)
+            {
+//                if(i==0)
+//                    eit=mHalfEdge.edges_begin();
+//                else
+//                    ++eit;
+
+                lf=mHalfEdge.face(*eit,0);
+                rf=mHalfEdge.face(*eit,1);
+
+                if(rf.is_valid())
+                {
+
+                    vert0=mHalfEdge.vertex(*eit,0);
+                    v0=Vector3f(vertices[vert0][0],vertices[vert0][1],vertices[vert0][2]);
+                    n0=Vector3f(normals[vert0][0],normals[vert0][1],normals[vert0][2]);
+
+
+                    vert1=mHalfEdge.vertex(*eit,1);
+                    v1=Vector3f(vertices[vert1][0],vertices[vert1][1],vertices[vert1][2]);
+                    n1=Vector3f(normals[vert1][0],normals[vert1][1],normals[vert1][2]);
+
+                    mesh->mPositionsHole.push_back(v0);
+                    mesh->mPositionsHole.push_back(v1);
+
+                    mesh->mNormalsHole.push_back(n0);
+                    mesh->mNormalsHole.push_back(n1);
+
+//                if(!rf.is_valid())
+//                    std::cout<<"draw it xD"<<std::endl;
+
+                //mesh->drawEdges(&mSimple,v0,v1,n0,n1);
+               }
+
+
+            }
+
+            //mesh->draw(&mBlinn);
+            mesh->initEdges(&mSimple);
+
+            std::cout<<"fin test"<<std::endl;
+
+
+
         }
 
 

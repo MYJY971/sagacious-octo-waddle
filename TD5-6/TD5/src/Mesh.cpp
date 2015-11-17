@@ -93,4 +93,87 @@ void Mesh::draw(Shader *shader, bool drawEdges)
     glBindVertexArray(0);
 }
 
+void Mesh::initEdges(Shader *shader)
+{
+//    mPositionsHole.push_back(p1);
+//    mPositionsHole.push_back(p2);
+
+//    mNormalsHole.push_back(n1);
+//    mNormalsHole.push_back(n2);
+
+
+    glGenVertexArrays(1,&mVaoHole);
+    glGenBuffers(2,mBufsHole);
+
+    glBindVertexArray(mVaoHole);
+
+    glBindBuffer(GL_ARRAY_BUFFER,mBufsHole[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mPositionsHole.size(), mPositionsHole.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER,mBufsHole[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mNormalsHole.size(), mNormalsHole.data(), GL_STATIC_DRAW);
+
+    //specifyVertexData(shader);
+
+    glBindVertexArray(0);
+
+    mReadyHole=true;
+
+
+}
+
+void Mesh::drawEdges(Shader *shader)
+    {
+//        Point3f mPoints[2] = {p1, p2};
+
+
+//        unsigned int vertexBufferId;
+//        glGenBuffers(1,&vertexBufferId);
+//        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+//        glBufferData(GL_ARRAY_BUFFER, sizeof(Point3f)*2, mPoints[0].data(), GL_STATIC_DRAW);
+
+//        unsigned int vertexArrayId;
+//        glGenVertexArrays(1,&vertexArrayId);
+
+//        // bind the vertex array
+//        glBindVertexArray(vertexArrayId);
+
+//        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+
+//        int vertex_loc = prg->attrib("vtx_position");
+//        glVertexAttribPointer(vertex_loc, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+//        glEnableVertexAttribArray(vertex_loc);
+
+//        glDrawArrays(GL_LINES,0,2);
+
+//        glDisableVertexAttribArray(vertex_loc);
+//        glBindVertexArray(0);
+
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//        glDeleteBuffers(1, &vertexBufferId);
+//        glBindVertexArray(0);
+//        glDeleteVertexArrays(1, &vertexArrayId);
+
+
+    if (!mReadyHole) {
+        //std::cerr<<"Warning: PointCloud not ready for rendering" << std::endl;
+        return;
+    }
+          glBindVertexArray(mVaoHole);
+          if(mShader->id() != shader->id()){
+              specifyVertexData(shader);
+          }
+
+          glDrawArrays(GL_LINES, 0, mPositionsHole.size());
+          GL_TEST_ERR;
+          glBindVertexArray(0);
+
+
+
+
+
+    }
+
+
+
 

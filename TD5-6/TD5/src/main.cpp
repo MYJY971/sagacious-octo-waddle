@@ -72,8 +72,8 @@ void initGL()
 
     //Mesh
     mesh = new Mesh();
-    mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
-    //mesh->load(PGHP_DIR"/data/cubetest.obj");
+    mesh->load(PGHP_DIR"/data/PhantomLite.obj");
+    //mesh->load(PGHP_DIR"/data/sphere.obj");
     mesh->makeUnitary();
     mesh->init(&mBlinn);
 
@@ -243,7 +243,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
             Surface_mesh::Edge_iterator eit;
 
+            //Surface_mesh::Halfedge_iterator eit;
+
             for(eit=mHalfEdge.edges_begin(); eit!=mHalfEdge.edges_end(); ++eit)
+            //for(eit=mHalfEdge.halfedges_begin(); eit!=mHalfEdge.halfedges_end();++eit)
 //            for(int i=0; i<10000; i++)
             {
 //                if(i==0)
@@ -254,7 +257,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
                 lf=mHalfEdge.face(*eit,0);
                 rf=mHalfEdge.face(*eit,1);
 
-                if(rf.is_valid())
+                if(!rf.is_valid() || !lf.is_valid())
                 {
 
                     vert0=mHalfEdge.vertex(*eit,0);
@@ -281,7 +284,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
             }
 
+
+
+
             //mesh->draw(&mBlinn);
+
+
+
+
+
+
             mesh->initEdges(&mSimple);
 
             std::cout<<"fin test"<<std::endl;
@@ -289,6 +301,99 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 
         }
+
+        else if(key == GLFW_KEY_B)
+        {
+
+            int c1=0;
+            int c2=0;
+            int c3=0;
+            std::cout<<"debut test"<<std::endl;
+            Surface_mesh mHalfEdge=mesh->mHalfEdge;
+
+            Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
+            Surface_mesh::Vertex_property<Point> normals = mHalfEdge.get_vertex_property<Point>("v:normal");
+
+            Surface_mesh::Face lf;
+            Surface_mesh::Face rf;
+
+            Surface_mesh::Vertex vert0;
+            Surface_mesh::Vertex vert1;
+
+
+            Vector3f v0;
+            Vector3f v1;
+
+            Vector3f n0;
+            Vector3f n1;
+
+            Surface_mesh::Edge e1,e;
+
+            Surface_mesh::Edge_iterator eit;
+
+            Surface_mesh::Halfedge_iterator heit;
+
+            for(heit=mHalfEdge.halfedges_begin(); heit!=mHalfEdge.halfedges_end();++heit)
+            {
+
+
+                e1=mHalfEdge.edge(*heit);
+                lf=mHalfEdge.face(e1,0);
+                rf=mHalfEdge.face(e1,1);
+
+                if(!lf.is_valid())
+                {
+                    c1++;
+                }
+                if(!rf.is_valid())
+                {
+                    c2++;
+                }
+
+                Surface_mesh::Halfedge he = *heit;
+
+                if(mHalfEdge.is_boundary(he))
+                {
+
+                    e=mHalfEdge.edge(he);
+
+                    vert0=mHalfEdge.vertex(e,0);
+                    v0=Vector3f(vertices[vert0][0],vertices[vert0][1],vertices[vert0][2]);
+                    n0=Vector3f(normals[vert0][0],normals[vert0][1],normals[vert0][2]);
+
+
+                    vert1=mHalfEdge.vertex(e,1);
+                    v1=Vector3f(vertices[vert1][0],vertices[vert1][1],vertices[vert1][2]);
+                    n1=Vector3f(normals[vert1][0],normals[vert1][1],normals[vert1][2]);
+
+                    mesh->mPositionsHole.push_back(v0);
+                    mesh->mPositionsHole.push_back(v1);
+
+                    mesh->mNormalsHole.push_back(n0);
+                    mesh->mNormalsHole.push_back(n1);
+
+                }
+
+
+            }
+
+
+
+
+
+
+            //mesh->initEdges(&mSimple);
+            mesh->initEdges(&mSimple);
+
+            std::cout<<"fin test c1="<<c1<<" c2="<<c2<< " c3=" <<c3 <<std::endl;
+
+
+
+
+        }
+
+
+
 
 
     }

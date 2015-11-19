@@ -10,24 +10,19 @@
 #include <eigen3/Eigen/Geometry>
 using namespace Eigen;
 
-
 #include "Shader.h"
 #include "Trackball.h"
 #include "Mesh.h"
 #include "Pointcloud.h"
 #include "Octree.h"
 #include "WireCube.h"
-#include "Mesh.h"
-#include "Meshloader.h"
-#include <surface_mesh/surface_mesh.h>
 
-using namespace surface_mesh;
 // initial window size
 int WIDTH = 640;
 int HEIGHT = 480;
 
 // the default shader program
-Shader mBlinn, mSimple, mHole;
+Shader mBlinn, mSimple, mMesh;
 
 // geometrical represnetation of a pointlight
 Vector3f mLightPos(1,1,1);
@@ -41,14 +36,12 @@ int mButton = -1;
 
 //Point Cloud Object
 PointCloud* pc;
-
-//Mesh
 Mesh* mesh;
 
 //Octree Debug
 Octree* octree;
 WireCube* wirecube;
-int octreeVisu = -1;
+int octreeVisu = 0;
 
 /** This method needs to be called once the GL context has been created by GLFW.
   * It is called only once per execution */
@@ -56,14 +49,15 @@ void initGL()
 { 
     // set the background color, i.e., the color used
     // to fill the screen when calling glClear(GL_COLOR_BUFFER_BIT)
-    glClearColor(0.3f,0.3f,0.3f,0.);
+    glClearColor(0.8f,0.8f,0.8f,0.);
 
     glEnable(GL_DEPTH_TEST);
 
+
     // load the default shaders 
     mBlinn.loadFromFiles(PGHP_DIR"/shaders/blinn.vert", PGHP_DIR"/shaders/blinn.frag");
+    mMesh.loadFromFiles(PGHP_DIR"/shaders/mesh.vert", PGHP_DIR"/shaders/mesh.frag");
     mSimple.loadFromFiles(PGHP_DIR"/shaders/simple.vert", PGHP_DIR"/shaders/simple.frag");
-    mHole.loadFromFiles(PGHP_DIR"/shaders/hole.vert", PGHP_DIR"/shaders/hole.frag");
 
     //PointCloud
     pc = new PointCloud();
@@ -73,12 +67,11 @@ void initGL()
 
     //Mesh
     mesh = new Mesh();
-    //mesh->load(PGHP_DIR"/data/PhantomLite.obj");
-    mesh->load(PGHP_DIR"/data/sphere.obj");
+    mesh->load(PGHP_DIR"/data/PhantomLite.obj");
     mesh->makeUnitary();
-    mesh->init(&mBlinn);
+    mesh->init(&mMesh);
 
-    //Octree
+//    Octree
     octree = new Octree(pc,15,10);
     wirecube = new WireCube();
     wirecube->init(&mSimple);
@@ -98,29 +91,53 @@ void render(GLFWwindow* window)
     // clear the buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear all buffers
 
+    Matrix3f normal_matrix;
+
     //Draw PointCloud
-    mBlinn.activate();
+//    Vector4f light_pos_pc;
 
-    glUniformMatrix4fv(mBlinn.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
-    glUniformMatrix4fv(mBlinn.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
-    Vector4f light_pos;
-    light_pos << mLightPos , 1.0f;
-    glUniform4fv(mBlinn.getUniformLocation("light_pos"),1,light_pos.data());
+//    mBlinn.activate();
+//    glUniformMatrix4fv(mBlinn.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
+//    glUniformMatrix4fv(mBlinn.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
 
-    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,/*pc*/mesh->getTransformationMatrix().data());
-    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*/*pc*/mesh->getTransformationMatrix()).linear().inverse().transpose();
-    glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
+//    light_pos_pc << mLightPos , 1.0f;
+//    glUniform4fv(mBlinn.getUniformLocation("light_pos"),1,light_pos_pc.data());
 
-    //mesh->draw(&mBlinn,true);
-    mesh->drawEdges(&mBlinn);
-    //pc->draw(&mBlinn);
+//    glUniformMatrix4fv(mBlinn.getUniformLocation("object_matrix"),1,false,pc->getTransformationMatrix().data());
+//    normal_matrix = (mCamera.computeViewMatrix()*pc->getTransformationMatrix()).linear().inverse().transpose();
+//    glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
-    //mesh->draw(&mBlinn,false);
+
+//    pc->draw(&mBlinn);
+
+
+    // Draw Mesh
+    Vector4f light_pos_mesh;
+
+    mMesh.activate();
+    glUniformMatrix4fv(mMesh.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
+    glUniformMatrix4fv(mMesh.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
+
+    light_pos_mesh << mLightPos , 1.0f;
+    glUniform4fv(mMesh.getUniformLocation("light_pos"),1,light_pos_mesh.data());
+
+    glUniformMatrix4fv(mMesh.getUniformLocation("object_matrix"),1,false,mesh->getTransformationMatrix().data());
+    normal_matrix = (mCamera.computeViewMatrix()*mesh->getTransformationMatrix()).linear().inverse().transpose();
+    glUniformMatrix3fv(mMesh.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
+
+
+
+    mesh->draw(&mMesh, true);
+
+
+
+
+
 
     //Draw Octree
     if(octreeVisu >= 0)
     {
-        mSimple.activate();
+        //mSimple.activate();
         glUniformMatrix4fv(mSimple.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
         glUniformMatrix4fv(mSimple.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
         std::vector<AlignedBox3f> aabbs = octree->getAABBs(octreeVisu);
@@ -132,11 +149,6 @@ void render(GLFWwindow* window)
             wirecube->draw(&mSimple);
         }
     }
-
-    mHole.activate();
-    glUniformMatrix4fv(mHole.getUniformLocation("object_matrix"),1,false,mesh->getTransformationMatrix().data());
-    glUniformMatrix3fv(mHole.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
-    mesh->drawEdges(&mHole);
 
     // check OpenGL errors
     GL_TEST_ERR;
@@ -225,106 +237,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
             std::cout << "ending number of points " << pc->numPoints() << std::endl;
         }
-        else if(key == GLFW_KEY_X)
-        {
-
-
-            mesh->detectHole(&mHole);
-
-        }
-
-        else if(key == GLFW_KEY_B)
-        {
-
-            int c1=0;
-            int c2=0;
-            int c3=0;
-            std::cout<<"debut test"<<std::endl;
-            Surface_mesh mHalfEdge=mesh->mHalfEdge;
-
-            Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
-            Surface_mesh::Vertex_property<Point> normals = mHalfEdge.get_vertex_property<Point>("v:normal");
-
-            Surface_mesh::Face lf;
-            Surface_mesh::Face rf;
-
-            Surface_mesh::Vertex vert0;
-            Surface_mesh::Vertex vert1;
-
-
-            Vector3f v0;
-            Vector3f v1;
-
-            Vector3f n0;
-            Vector3f n1;
-
-            Surface_mesh::Edge e1,e;
-
-            Surface_mesh::Edge_iterator eit;
-
-            Surface_mesh::Halfedge_iterator heit;
-
-            for(heit=mHalfEdge.halfedges_begin(); heit!=mHalfEdge.halfedges_end();++heit)
-            {
-
-
-                e1=mHalfEdge.edge(*heit);
-                lf=mHalfEdge.face(e1,0);
-                rf=mHalfEdge.face(e1,1);
-
-                if(!lf.is_valid())
-                {
-                    c1++;
-                }
-                if(!rf.is_valid())
-                {
-                    c2++;
-                }
-
-                Surface_mesh::Halfedge he = *heit;
-
-                if(mHalfEdge.is_boundary(he))
-                {
-
-                    e=mHalfEdge.edge(he);
-
-                    vert0=mHalfEdge.vertex(e,0);
-                    v0=Vector3f(vertices[vert0][0],vertices[vert0][1],vertices[vert0][2]);
-                    n0=Vector3f(normals[vert0][0],normals[vert0][1],normals[vert0][2]);
-
-
-                    vert1=mHalfEdge.vertex(e,1);
-                    v1=Vector3f(vertices[vert1][0],vertices[vert1][1],vertices[vert1][2]);
-                    n1=Vector3f(normals[vert1][0],normals[vert1][1],normals[vert1][2]);
-
-                    mesh->mPositionsHole.push_back(v0);
-                    mesh->mPositionsHole.push_back(v1);
-
-                    mesh->mNormalsHole.push_back(n0);
-                    mesh->mNormalsHole.push_back(n1);
-
-                }
-
-
-            }
-
-
-
-
-
-
-            //mesh->initEdges(&mSimple);
-            mesh->initEdges(&mSimple);
-
-            std::cout<<"fin test c1="<<c1<<" c2="<<c2<< " c3=" <<c3 <<std::endl;
-
-
-
-
-        }
-
-
-
 
 
     }

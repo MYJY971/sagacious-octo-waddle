@@ -7,7 +7,8 @@ PointCloud::~PointCloud()
 {
     if(mReady)
     {
-        glDeleteBuffers(2, mBufs);
+        //glDeleteBuffers(2, mBufs);
+        glDeleteBuffers(3, mBufs);
     }
 }
 
@@ -23,20 +24,24 @@ void PointCloud::load(const std::string& filename)
 
     Vector3f p,n;
 
+    int oneOnTwo = 0;
     while (!infile.eof())
     {
         infile >> p.x() >> p.y() >> p.z() >> n.x() >> n.y() >> n.z();
         mPositions.push_back(p);
         mNormals.push_back(n);
+        oneOnTwo = ++oneOnTwo%2;
+        Vector3f color = Vector3f((float) oneOnTwo, (float) oneOnTwo, (float) oneOnTwo);
+        mColors.push_back(color);
     }
-
     infile.close();
 }
 
 void PointCloud::init(Shader *shader)
 {
     glGenVertexArrays(1, &mVao);
-    glGenBuffers(2, mBufs);
+    //glGenBuffers(2, mBufs);
+    glGenBuffers(3, mBufs);
 
     glBindVertexArray(mVao);
 
@@ -45,6 +50,9 @@ void PointCloud::init(Shader *shader)
 
     glBindBuffer(GL_ARRAY_BUFFER, mBufs[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mNormals.size(), mNormals.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mBufs[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mColors.size(), mColors.data(), GL_STATIC_DRAW);
 
     specifyVertexData(shader);
 
@@ -85,19 +93,25 @@ void PointCloud::specifyVertexData(Shader *shader)
         glEnableVertexAttribArray(normal_loc);
         glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
     }
+
+    glBindBuffer(GL_ARRAY_BUFFER,   mBufs[2] );
+    int color_loc = shader->getAttribLocation("vtx_color");
+    if(color_loc>=0){
+        glEnableVertexAttribArray(color_loc);
+        glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0 );
+    }
 }
 
 
-void PointCloud::makeUnitaryPos(std::vector<Vector3f> &pos)
+void PointCloud::makeUnitary()
 {
-
     // computes the lowest and highest coordinates of the axis aligned bounding box,
     // which are equal to the lowest and highest coordinates of the vertex positions.
     Vector3f lowest, highest;
     lowest.fill(std::numeric_limits<float>::max());   // "fill" sets all the coefficients of the vector to the same value
     highest.fill(-std::numeric_limits<float>::max());
 
-    for(std::vector<Eigen::Vector3f>::iterator v_iter = pos.begin() ; v_iter!=pos.end() ; ++v_iter)
+    for(std::vector<Eigen::Vector3f>::iterator v_iter = mPositions.begin() ; v_iter!=mPositions.end() ; ++v_iter)
     {
       // - v_iter is an iterator over the elements of mVertices,
       //   an iterator behaves likes a pointer, it has to be dereferenced (*v_iter, or v_iter->) to access the referenced element.
@@ -111,15 +125,10 @@ void PointCloud::makeUnitaryPos(std::vector<Vector3f> &pos)
     // que la boite englobante de l'objet soit centrée en (0,0,0)  et que sa plus grande dimension soit de 1
     Vector3f center = (lowest+highest)/2.0;
     float m = (highest-lowest).maxCoeff();
-    for(unsigned i=0; i<pos.size(); ++i)
+    for(unsigned i=0; i<mPositions.size(); ++i)
     {
-        pos[i] = (pos[i] - center) / m;
+        mPositions[i] = (mPositions[i] - center) / m;
     }
-}
-
-void::PointCloud::makeUnitary()
-{
-    makeUnitaryPos(mPositions);
 }
 
 const std::vector<Eigen::Vector3f>& PointCloud::getPositions() const
@@ -130,4 +139,9 @@ const std::vector<Eigen::Vector3f>& PointCloud::getPositions() const
 const std::vector<Eigen::Vector3f>& PointCloud::getNormals() const
 {
     return mNormals;
+}
+
+const std::vector<Eigen::Vector3f> &PointCloud::getColors() const
+{
+    return mColors;
 }

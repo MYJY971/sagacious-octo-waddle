@@ -15,6 +15,8 @@ public:
     void draw(Shader *shader, bool drawEdges = false);
     void initEdges(Shader *shader);
     void drawEdges(Shader *shader);
+    void detectHole(Shader *shader);
+    void specifyVertexDataHole(Shader *shader);
 
     surface_mesh::Surface_mesh mHalfEdge;
 
@@ -22,6 +24,7 @@ public:
     std::vector<Eigen::Vector3f> mNormalsHole;
 
     bool mReadyHole;
+    std::vector<Eigen::Vector3i> mIndicesHole;
 
 private:
 
@@ -30,10 +33,10 @@ private:
     //surface_mesh::Surface_mesh mHalfEdge;
 
     GLuint mIndicesBuffer;
+    GLuint mIndicesBufferHole;
 
 
-
-
+    Shader *mShaderHole;
     GLuint mVaoHole;
     GLuint mBufsHole[2];//Positions,Normals
 

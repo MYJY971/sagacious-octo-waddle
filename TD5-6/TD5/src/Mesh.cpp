@@ -88,18 +88,36 @@ void Mesh::draw(Shader *shader, bool drawEdges)
         specifyVertexData(shader);
     }
 
-    glDrawElements(drawEdges ? GL_LINE_LOOP : GL_TRIANGLES, mIndices.size()*sizeof(Vector3i),  GL_UNSIGNED_INT, 0);
+    drawEdges ? glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ) : glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) ;
+    glDrawElements(GL_TRIANGLES, mIndices.size()*sizeof(Vector3i),  GL_UNSIGNED_INT, 0);
+    //glDrawElements(drawEdges ? GL_LINE_LOOP : GL_TRIANGLES, mIndices.size()*sizeof(Vector3i),  GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
 }
 
+
+
+void Mesh::specifyVertexDataHole(Shader *shader)
+{
+    mShaderHole = shader;
+
+    glBindBuffer(GL_ARRAY_BUFFER, mBufsHole[0]);
+    int pos_loc = shader->getAttribLocation("vtx_position");
+    glEnableVertexAttribArray(pos_loc);
+    glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mBufsHole[1]);
+    int normal_loc = shader->getAttribLocation("vtx_normal");
+    if(normal_loc>=0){
+        glEnableVertexAttribArray(normal_loc);
+        glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
+    }
+}
+
+
+
 void Mesh::initEdges(Shader *shader)
 {
-//    mPositionsHole.push_back(p1);
-//    mPositionsHole.push_back(p2);
-
-//    mNormalsHole.push_back(n1);
-//    mNormalsHole.push_back(n2);
 
 
     glGenVertexArrays(1,&mVaoHole);
@@ -113,7 +131,19 @@ void Mesh::initEdges(Shader *shader)
     glBindBuffer(GL_ARRAY_BUFFER,mBufsHole[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mNormalsHole.size(), mNormalsHole.data(), GL_STATIC_DRAW);
 
-    //specifyVertexData(shader);
+    specifyVertexDataHole(shader);
+
+
+
+
+//    glBindVertexArray(0);
+
+
+//    glBindVertexArray(mVaoHole);
+
+    glGenBuffers(1, &mIndicesBufferHole);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferHole);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Vector3i)*mIndicesHole.size(), mIndicesHole.data(),  GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
@@ -124,36 +154,6 @@ void Mesh::initEdges(Shader *shader)
 
 void Mesh::drawEdges(Shader *shader)
     {
-//        Point3f mPoints[2] = {p1, p2};
-
-
-//        unsigned int vertexBufferId;
-//        glGenBuffers(1,&vertexBufferId);
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(Point3f)*2, mPoints[0].data(), GL_STATIC_DRAW);
-
-//        unsigned int vertexArrayId;
-//        glGenVertexArrays(1,&vertexArrayId);
-
-//        // bind the vertex array
-//        glBindVertexArray(vertexArrayId);
-
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-
-//        int vertex_loc = prg->attrib("vtx_position");
-//        glVertexAttribPointer(vertex_loc, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-//        glEnableVertexAttribArray(vertex_loc);
-
-//        glDrawArrays(GL_LINES,0,2);
-
-//        glDisableVertexAttribArray(vertex_loc);
-//        glBindVertexArray(0);
-
-//        glBindBuffer(GL_ARRAY_BUFFER, 0);
-//        glDeleteBuffers(1, &vertexBufferId);
-//        glBindVertexArray(0);
-//        glDeleteVertexArrays(1, &vertexArrayId);
-
 
     if (!mReadyHole) {
         //std::cerr<<"Warning: PointCloud not ready for rendering" << std::endl;
@@ -161,18 +161,60 @@ void Mesh::drawEdges(Shader *shader)
     }
           glBindVertexArray(mVaoHole);
           if(mShader->id() != shader->id()){
-              specifyVertexData(shader);
+              specifyVertexDataHole(shader);
           }
 
-          glDrawArrays(GL_LINES, 0, mPositionsHole.size());
-          GL_TEST_ERR;
+          //glDrawArrays(GL_TRIANGLES, 0, mPositionsHole.size());
+          glDrawElements(GL_TRIANGLES, mIndicesHole.size()*sizeof(Vector3i),  GL_UNSIGNED_INT, 0);
+
           glBindVertexArray(0);
 
 
 
-
-
     }
+
+void Mesh::detectHole(Shader *shader)
+{
+//    mHalfEdge.update_face_normals();
+//    mHalfEdge.update_vertex_normals();
+
+    // vertex properties
+    Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
+    Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
+
+    // vertex iterator
+    Surface_mesh::Vertex_iterator vit;
+
+    for(vit = mHalfEdge.vertices_begin(); vit != mHalfEdge.vertices_end(); ++vit)
+    {
+       mPositionsHole.push_back(Vector3f(vertices[*vit][0],vertices[*vit][1],vertices[*vit][2]));
+       mNormalsHole.push_back(Vector3f(vnormals[*vit][0],vnormals[*vit][1],vnormals[*vit][2]));
+    }
+
+    // face iterator
+    Surface_mesh::Face_iterator fit, fend = mHalfEdge.faces_end();
+    // vertex circulator
+    Surface_mesh::Vertex_around_face_circulator fvit, fvend;
+    Surface_mesh::Vertex v0, v1, v2;
+    for (fit = mHalfEdge.faces_begin(); fit != fend; ++fit)
+    {
+        fvit = fvend = mHalfEdge.vertices(*fit);
+        v0 = *fvit;
+        ++fvit;
+        v2 = *fvit;
+
+        do{
+            v1 = v2;
+            ++fvit;
+            v2 = *fvit;
+            mIndicesHole.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
+        } while (++fvit != fvend);
+    }
+
+    makeUnitaryPos(mPositionsHole);
+    initEdges(shader);
+    //drawEdges(shader);
+}
 
 
 

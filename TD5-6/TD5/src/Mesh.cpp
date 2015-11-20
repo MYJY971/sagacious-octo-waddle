@@ -160,7 +160,7 @@ void Mesh::drawEdges(Shader *shader)
         return;
     }
           glBindVertexArray(mVaoHole);
-          if(mShader->id() != shader->id()){
+          if(mShaderHole->id() != shader->id()){
               specifyVertexDataHole(shader);
           }
 
@@ -175,9 +175,7 @@ void Mesh::drawEdges(Shader *shader)
 
 void Mesh::detectHole(Shader *shader)
 {
-//    mHalfEdge.update_face_normals();
-//    mHalfEdge.update_vertex_normals();
-
+/*
     // vertex properties
     Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
     Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
@@ -213,7 +211,30 @@ void Mesh::detectHole(Shader *shader)
 
     makeUnitaryPos(mPositionsHole);
     initEdges(shader);
-    //drawEdges(shader);
+*/
+
+    // vertex properties
+    std::vector<Vector3f> stockPos;
+
+    Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
+    Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
+
+    Surface_mesh::Halfedge_iterator hei;
+
+    Surface_mesh::Halfedge hetest;
+    for (hei=mHalfEdge.halfedges_begin(); hei!=mHalfEdge.halfedges_end(); ++hei)
+    {
+        if(mHalfEdge.is_boundary(*hei))
+        {
+
+        }
+
+
+    }
+
+
+
+
 }
 
 

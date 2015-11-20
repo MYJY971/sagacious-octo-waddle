@@ -111,8 +111,8 @@ void render(GLFWwindow* window)
     Matrix3f normal_matrix = (mCamera.computeViewMatrix()*/*pc*/mesh->getTransformationMatrix()).linear().inverse().transpose();
     glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
-    //mesh->draw(&mBlinn,true);
-    mesh->drawEdges(&mBlinn);
+    mesh->draw(&mBlinn,true);
+    //mesh->drawEdges(&mHole);
     //pc->draw(&mBlinn);
 
     //mesh->draw(&mBlinn,false);

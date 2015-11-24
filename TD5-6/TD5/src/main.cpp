@@ -27,7 +27,7 @@ int WIDTH = 640;
 int HEIGHT = 480;
 
 // the default shader program
-Shader mBlinn, mSimple, mHole;
+Shader mBlinn, mSimple, mHole, mMesh;
 
 // geometrical represnetation of a pointlight
 Vector3f mLightPos(1,1,1);
@@ -64,6 +64,7 @@ void initGL()
     mBlinn.loadFromFiles(PGHP_DIR"/shaders/blinn.vert", PGHP_DIR"/shaders/blinn.frag");
     mSimple.loadFromFiles(PGHP_DIR"/shaders/simple.vert", PGHP_DIR"/shaders/simple.frag");
     mHole.loadFromFiles(PGHP_DIR"/shaders/hole.vert", PGHP_DIR"/shaders/hole.frag");
+    mMesh.loadFromFiles(PGHP_DIR"/shaders/mesh.vert", PGHP_DIR"/shaders/mesh.frag");
 
     //PointCloud
     pc = new PointCloud();
@@ -111,11 +112,27 @@ void render(GLFWwindow* window)
     Matrix3f normal_matrix = (mCamera.computeViewMatrix()*/*pc*/mesh->getTransformationMatrix()).linear().inverse().transpose();
     glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
-    mesh->draw(&mBlinn,true);
+    mesh->draw(&mBlinn);
     //mesh->drawEdges(&mHole);
     //pc->draw(&mBlinn);
 
-    //mesh->draw(&mBlinn,false);
+
+//    Vector4f light_pos_mesh;
+
+//    mMesh.activate();
+//    glUniformMatrix4fv(mMesh.getUniformLocation("projection_matrix"),1,false,mCamera.computeProjectionMatrix().data());
+//    glUniformMatrix4fv(mMesh.getUniformLocation("modelview_matrix"),1,false,mCamera.computeViewMatrix().data());
+
+//    light_pos_mesh << mLightPos , 1.0f;
+//    glUniform4fv(mMesh.getUniformLocation("light_pos"),1,light_pos_mesh.data());
+
+//    glUniformMatrix4fv(mMesh.getUniformLocation("object_matrix"),1,false,mesh->getTransformationMatrix().data());
+//    Matrix3f normal_matrix = (mCamera.computeViewMatrix()*mesh->getTransformationMatrix()).linear().inverse().transpose();
+//    glUniformMatrix3fv(mMesh.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
+
+
+
+//    mesh->draw(&mMesh);
 
     //Draw Octree
     if(octreeVisu >= 0)
@@ -136,7 +153,7 @@ void render(GLFWwindow* window)
     mHole.activate();
     glUniformMatrix4fv(mHole.getUniformLocation("object_matrix"),1,false,mesh->getTransformationMatrix().data());
     glUniformMatrix3fv(mHole.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
-    mesh->drawEdges(&mHole);
+    //mesh->drawEdges(&mHole);
 
     // check OpenGL errors
     GL_TEST_ERR;
@@ -230,6 +247,11 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 
             mesh->detectHole(&mHole);
+            mesh->init(&mBlinn);
+
+
+
+
 
         }
 

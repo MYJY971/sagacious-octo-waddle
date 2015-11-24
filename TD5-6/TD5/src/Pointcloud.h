@@ -24,6 +24,7 @@ public:
 
     const std::vector<Eigen::Vector3f>& getPositions() const;
     const std::vector<Eigen::Vector3f>& getNormals() const;
+    const std::vector<Eigen::Vector3f>& getColors() const;
 
     int numPoints() const {return mPositions.size();}
 
@@ -33,9 +34,10 @@ protected:
 
     std::vector<Eigen::Vector3f> mPositions;
     std::vector<Eigen::Vector3f> mNormals;
+    std::vector<Eigen::Vector3f> mColors;
 
     GLuint mVao;
-    GLuint mBufs[2];//Positions,Normals
+    GLuint mBufs[3];//Positions,Normals, Colors
 };
 
 #endif // POINTCLOUD_H

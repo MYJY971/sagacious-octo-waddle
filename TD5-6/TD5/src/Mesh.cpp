@@ -37,6 +37,9 @@ void Mesh::load(const string& filename)
     {
         mPositions.push_back(Vector3f(vertices[*vit][0],vertices[*vit][1],vertices[*vit][2]));
         mNormals.push_back(Vector3f(vnormals[*vit][0],vnormals[*vit][1],vnormals[*vit][2]));
+        Vector3f color(1.,1.,1.);
+        mColors.push_back(color);
+        posVert.push_back(*vit);
     }
 
     // face iterator
@@ -221,17 +224,95 @@ void Mesh::detectHole(Shader *shader)
 
     Surface_mesh::Halfedge_iterator hei;
 
-    Surface_mesh::Halfedge hetest;
+    Surface_mesh::Halfedge heNext;
+
+    int nbHole=0;
+
+    vector<Surface_mesh::Edge> stockEdge;
+    vector<Surface_mesh::Vertex> stockvertice;
+
+    bool stop;
+
     for (hei=mHalfEdge.halfedges_begin(); hei!=mHalfEdge.halfedges_end(); ++hei)
     {
+        stop=false;
         if(mHalfEdge.is_boundary(*hei))
         {
+            Surface_mesh::Edge e;
+            Surface_mesh::Vertex vbegin,vend,v0;
+
+            heNext=*hei;
+            e=mHalfEdge.edge(heNext);
+
+            if(stockEdge.size()==0)
+            {
+                stockEdge.push_back(e);
+            }
+
+            else
+            {
+                for(int i=0; i<stockEdge.size()-1;++i)
+                {
+                    if(e==stockEdge[i])
+                    {
+                        stop=true;
+                        i=stockEdge.size();
+                    }
+
+                }
+            }
+
+            if(!stop)
+            {
+                stockEdge.push_back(e);
+                vbegin=mHalfEdge.vertex(e,0);
+                vend  =mHalfEdge.vertex(e,1);
+                stockvertice.push_back(vend);
+
+
+                while(vend!=vbegin)
+                {
+                    heNext=mHalfEdge.next_halfedge(heNext);
+                    e=mHalfEdge.edge(heNext);
+                    stockEdge.push_back(e);
+                    vend=mHalfEdge.vertex(e,1);
+                    stockvertice.push_back(vend);
+                }
+
+
+
+//            std::cout<<"vbegin="<<vbegin<<std::endl;
+//            std::cout<<"vend="<<vend<<std::endl;
+//            std::cout<<"vbegintest="<<vbegintest<<std::endl;
+//            std::cout<<"vend="<<vendtest<<std::endl;
+
+
+                nbHole++;
+            }
 
         }
 
 
     }
 
+
+
+    std::cout<<"nbHole="<<nbHole<<std::endl;
+
+    for(int i=0; i<stockvertice.size()-1;++i)
+    {
+
+        for(int j=0; j<posVert.size()-1;++j)
+        {
+            if(stockvertice[i]==posVert[j])
+            {
+
+                mColors[j]=Vector3f(1.,0.,0.);
+                j=posVert.size();
+
+            }
+        }
+    }
 
 
 

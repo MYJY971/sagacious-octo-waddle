@@ -18,8 +18,8 @@ void main()
 	vec4 view_vtx = modelview_matrix * object_matrix * vec4(vtx_position, 1.);
 	vertexV = view_vtx.xyz;
 	normalV = normal_matrix * vtx_normal;
-	
-	colorV = vtx_color;
 
+	colorV = vtx_color;
+	
 	gl_Position = projection_matrix * view_vtx;
 }

@@ -29,6 +29,7 @@ public:
 private:
 
     std::vector<Eigen::Vector3i> mIndices;
+    std::vector<surface_mesh::Surface_mesh::Vertex> posVert;
 
     //surface_mesh::Surface_mesh mHalfEdge;
 

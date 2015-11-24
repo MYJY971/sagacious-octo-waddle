@@ -36,7 +36,7 @@ void PointCloud::load(const std::string& filename)
 void PointCloud::init(Shader *shader)
 {
     glGenVertexArrays(1, &mVao);
-    glGenBuffers(2, mBufs);
+    glGenBuffers(3, mBufs);
 
     glBindVertexArray(mVao);
 
@@ -45,6 +45,9 @@ void PointCloud::init(Shader *shader)
 
     glBindBuffer(GL_ARRAY_BUFFER, mBufs[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mNormals.size(), mNormals.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mBufs[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mColors.size(), mColors.data(), GL_STATIC_DRAW);
 
     specifyVertexData(shader);
 
@@ -84,6 +87,13 @@ void PointCloud::specifyVertexData(Shader *shader)
     if(normal_loc>=0){
         glEnableVertexAttribArray(normal_loc);
         glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER,   mBufs[2] );
+    int color_loc = shader->getAttribLocation("vtx_color");
+    if(color_loc>=0){
+        glEnableVertexAttribArray(color_loc);
+        glVertexAttribPointer(color_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0 );
     }
 }
 
@@ -130,4 +140,9 @@ const std::vector<Eigen::Vector3f>& PointCloud::getPositions() const
 const std::vector<Eigen::Vector3f>& PointCloud::getNormals() const
 {
     return mNormals;
+}
+
+const std::vector<Eigen::Vector3f> &PointCloud::getColors() const
+{
+    return mColors;
 }

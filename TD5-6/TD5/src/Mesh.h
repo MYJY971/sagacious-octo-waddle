@@ -17,6 +17,9 @@ public:
     void drawEdges(Shader *shader);
     void detectHole(Shader *shader);
     void specifyVertexDataHole(Shader *shader);
+    void displayHoles();
+    void holeTriangulation();
+    void earClimpy();
 
     surface_mesh::Surface_mesh mHalfEdge;
 
@@ -30,6 +33,8 @@ private:
 
     std::vector<Eigen::Vector3i> mIndices;
     std::vector<surface_mesh::Surface_mesh::Vertex> posVert;
+
+    std::vector< std::vector<surface_mesh::Surface_mesh::Vertex> > mHoles;
 
     //surface_mesh::Surface_mesh mHalfEdge;
 

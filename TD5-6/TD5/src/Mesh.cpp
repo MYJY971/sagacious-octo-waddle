@@ -359,6 +359,10 @@ void Mesh::earClimpy()
  vector<Surface_mesh::Vertex> hole;
  hole=mHoles[2];
  vector<Vector3f> vertexHole;
+ Vector3f geoCenter(0.,0.,0.);
+
+
+
 
     Vector3f v0,v1,v2;
     for(int i=0; i<hole.size();++i)
@@ -369,25 +373,32 @@ void Mesh::earClimpy()
              if(hole[i]==posVert[j])
             {
              vertexHole.push_back(mPositions[j]);
+             geoCenter+=mPositions[j];
              j=posVert.size();
 
             }
         }
     }
 
+    geoCenter = geoCenter/hole.size();
+
+
 
 bool isEar = false;
 
 vector<Surface_mesh::Vertex> tmpHole=hole;
-vector<Surface_mesh::Vertex> nexHole;
+vector<Surface_mesh::Vertex> newHole;
 
-Surface_mesh::Vertex vStart;
-
+Surface_mesh::Vertex sv0, sv1, sv2;
+Vector3f vStart;
+int i =0;
 while(tmpHole.size()>3)
 {
     //search ear
-    for(int i=0; i<tmpHole.size(); ++i)
-    {
+//    for(int i=0; i<tmpHole.size(); ++i)
+    //while(i<tmpHole.size())
+    //{
+
         while( ( tmpHole[i+2]!=tmpHole[tmpHole.size()-1]) && isEar==false)
         {
             //std::cout << "test" << std::endl;
@@ -400,29 +411,81 @@ while(tmpHole.size()>3)
                         v1=vertexHole[ind+1];
                         v2=vertexHole[ind+2];
 
+                        sv0=tmpHole[i];
+                        sv1=tmpHole[i+1];
+                        sv2=tmpHole[i+2];
+
+                        //std::cout << ind << std::endl;
+
+
+
+                        Vector3f GV1 = geoCenter + v1;
+                        Vector3f GV0 = geoCenter + v0;
+                        Vector3f GV2 = geoCenter + v2;
+
+                        if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
+                           {
+
+                           isEar=true;
+                           vStart=v0;
+                           }
+
+
                         ind=hole.size();
+
+
                     }
+
+
                 }
 
-             Vector3f AB = v1-v0;
-             Vector3f AC = v1-v1;
+                if(isEar==false)
+                    i++;
 
-             double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
+        }
 
-             double angle=acos(cosBAC);
+//             Vector3f AB = v1-v0;
+//             Vector3f AC = v1-v2;
 
-             if(angle<M_PI)
-             {
-                isEar=true;
-                vStart=v0;
-             }
+//             double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
+
+//             double angle=acos(cosBAC);
+
+             //if(angle<M_PI)
+             //{
+
+//                 Vector3f GV1 = geoCenter + v1;
+//                 Vector3f GV0 = geoCenter + v0;
+//                 Vector3f GV2 = geoCenter + v2;
+
+//                 if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
+//                    {
+
+//                    isEar=true;
+//                    vStart=v0;
+//                    }
+             //}
+        //}
+        if (isEar==true)
+        {
+            mIndices.push_back(Vector3i(sv0.idx(), sv1.idx(), sv2.idx()));
+
+            for (int j=0; j<tmpHole.size();++j)
+            {
+                if(j!=(i+1))
+                    newHole.push_back(tmpHole[j]);
+            }
+
+            //std::cout << tmpHole.size() << std::endl;
+            tmpHole=newHole;
+            //std::cout << tmpHole.size() << std::endl;
+            i=0;
         }
 
 
 
 
-
-    }
+break;
 
 
 }

@@ -302,10 +302,10 @@ void Mesh::displayHoles()
 
 }
 
-void Mesh::holeTriangulation()
+void Mesh::holeTriangulation(vector<Surface_mesh::Vertex> &hole)
 {
-    vector<Surface_mesh::Vertex> hole;
-    hole=mHoles[2];
+//    vector<Surface_mesh::Vertex> hole;
+//    hole=mHoles[2];
 
     Vector3f geoCenter(0.,0.,0.);
     Vector3f normGeoC(0.,0.,0.);
@@ -352,6 +352,11 @@ void Mesh::holeTriangulation()
 
 }
 
+void Mesh::fillHole()
+{
+    for (int i=0; i<mHoles.size(); ++i)
+        Mesh::holeTriangulation(mHoles[i]);
+}
 
 
 void Mesh::earClimpy()
@@ -372,6 +377,7 @@ void Mesh::earClimpy()
 
              if(hole[i]==posVert[j])
             {
+             std::cout << "hole["<< i <<"] = " << hole[i]  << std::endl;
              vertexHole.push_back(mPositions[j]);
              geoCenter+=mPositions[j];
              j=posVert.size();
@@ -387,26 +393,25 @@ void Mesh::earClimpy()
 bool isEar = false;
 
 vector<Surface_mesh::Vertex> tmpHole=hole;
-vector<Surface_mesh::Vertex> newHole;
+//vector<Surface_mesh::Vertex> newHole;
 
 Surface_mesh::Vertex sv0, sv1, sv2;
 Vector3f vStart;
 int i =0;
+int c= 0;
 while(tmpHole.size()>3)
 {
-    //search ear
-//    for(int i=0; i<tmpHole.size(); ++i)
-    //while(i<tmpHole.size())
-    //{
 
         while( ( tmpHole[i+2]!=tmpHole[tmpHole.size()-1]) && isEar==false)
         {
             //std::cout << "test" << std::endl;
 
+                //for(int ind=0; ind<hole.size(); ++ind)
                 for(int ind=0; ind<hole.size(); ++ind)
                 {
                     if(tmpHole[i]==hole[ind])
                     {
+//                         std::cout << "tmpHole["<< i <<"] = " << tmpHole[i]  << std::endl;
                         v0=vertexHole[ind];
                         v1=vertexHole[ind+1];
                         v2=vertexHole[ind+2];
@@ -415,7 +420,7 @@ while(tmpHole.size()>3)
                         sv1=tmpHole[i+1];
                         sv2=tmpHole[i+2];
 
-                        //std::cout << ind << std::endl;
+//                        std::cout << ind << std::endl;
 
 
 
@@ -425,9 +430,9 @@ while(tmpHole.size()>3)
 
                         if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
                            {
-
-                           isEar=true;
-                           vStart=v0;
+//                            std::cout << "test" << std::endl;
+                            isEar=true;
+                            vStart=v0;
                            }
 
 
@@ -444,32 +449,14 @@ while(tmpHole.size()>3)
 
         }
 
-//             Vector3f AB = v1-v0;
-//             Vector3f AC = v1-v2;
 
-//             double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
-
-//             double angle=acos(cosBAC);
-
-             //if(angle<M_PI)
-             //{
-
-//                 Vector3f GV1 = geoCenter + v1;
-//                 Vector3f GV0 = geoCenter + v0;
-//                 Vector3f GV2 = geoCenter + v2;
-
-//                 if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
-//                    {
-
-//                    isEar=true;
-//                    vStart=v0;
-//                    }
-             //}
-        //}
         if (isEar==true)
         {
             mIndices.push_back(Vector3i(sv0.idx(), sv1.idx(), sv2.idx()));
-
+//            std::cout << sv0.idx()<< std::endl;
+//            std::cout << sv1.idx() << std::endl;
+//            std::cout <<sv2.idx() << std::endl<<std::endl;
+            vector<Surface_mesh::Vertex> newHole;
             for (int j=0; j<tmpHole.size();++j)
             {
                 if(j!=(i+1))
@@ -479,16 +466,22 @@ while(tmpHole.size()>3)
             //std::cout << tmpHole.size() << std::endl;
             tmpHole=newHole;
             //std::cout << tmpHole.size() << std::endl;
+            //std::cout << "test" << std::endl;
             i=0;
+
+            isEar==false;
+
         }
+//std::cout << tmpHole.size() << std::endl;
 
 
 
-
-break;
+//break;
 
 
 }
+
+
 
 
 

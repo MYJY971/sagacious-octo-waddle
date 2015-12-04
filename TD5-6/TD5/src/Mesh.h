@@ -18,8 +18,9 @@ public:
     void detectHole(Shader *shader);
     void specifyVertexDataHole(Shader *shader);
     void displayHoles();
-    void holeTriangulation();
+    void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpy();
+    void fillHole();
 
     surface_mesh::Surface_mesh mHalfEdge;
 

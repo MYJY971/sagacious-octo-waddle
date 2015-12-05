@@ -279,7 +279,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         {
             mesh->detectHole(&mHole);
             mesh->init(&mBlinn);
-            mesh->earClimpy();
+            mesh->earClimpyTest();
             mesh->init(&mBlinn);
 
         }

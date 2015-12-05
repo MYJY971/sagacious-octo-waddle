@@ -20,6 +20,7 @@ public:
     void displayHoles();
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpy();
+    void earClimpyTest();
     void fillHole();
 
     surface_mesh::Surface_mesh mHalfEdge;

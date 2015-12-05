@@ -487,3 +487,85 @@ while(tmpHole.size()>3)
 
 }
 
+Vector3f getVectorValue(vector<Surface_mesh::Vertex> &vertexArray, vector<Vector3f> &vectorArray, Surface_mesh::Vertex v)
+{
+    Vector3f vect;
+
+    for (int i=0; i<vertexArray.size(); ++i)
+    {
+        if(vertexArray[i]==v)
+        {
+            vect=vectorArray[i];
+            i=vertexArray.size();
+
+        }
+    }
+
+    return vect;
+}
+
+
+bool isEar(vector<Surface_mesh::Vertex> &vertArray, vector<Vector3f> &vectArray, Surface_mesh::Vertex v0, Surface_mesh::Vertex v1, Surface_mesh::Vertex v2, Vector3f G)
+{
+    Vector3f V0 = getVectorValue(vertArray,vectArray,v0);
+    Vector3f V1 = getVectorValue(vertArray,vectArray,v1);
+    Vector3f V2 = getVectorValue(vertArray,vectArray,v2);
+
+    //angle > pi
+    Vector3f AB = V1-V0;
+    Vector3f AC = V1-V2;
+
+    double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
+
+    double BAC=acos(cosBAC);
+
+    if(BAC > M_PI)
+    {
+        return false;
+    }
+    else
+    {
+        Vector3f GV1 = G + V1;
+        Vector3f GV0 = G + V0;
+        Vector3f GV2 = G + V2;
+
+        if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
+        {
+         return true;
+        }
+        else
+            return false;
+    }
+}
+
+void Mesh::earClimpyTest()
+{
+    vector<Surface_mesh::Vertex> hole;
+    hole=mHoles[2];
+    vector<Vector3f> vectorHole;
+    Vector3f geoCenter(0.,0.,0.);
+
+    for(int i=0; i<hole.size();++i)
+    {
+         for(int j=0; j<posVert.size();++j)
+        {
+
+             if(hole[i]==posVert[j])
+            {
+//             std::cout << "hole["<< i <<"] = " << hole[i]  << std::endl;
+             vectorHole.push_back(mPositions[j]);
+             geoCenter+=mPositions[j];
+             j=posVert.size();
+
+            }
+        }
+    }
+
+    geoCenter = geoCenter/hole.size();
+
+
+
+
+
+}
+

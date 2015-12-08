@@ -20,9 +20,9 @@ public:
     void displayHoles();
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpyTest();
-    void earClimpy();
+    void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
 
-    void fillHole();
+    void fillHole(int choix);
 
     surface_mesh::Surface_mesh mHalfEdge;
 

@@ -359,7 +359,7 @@ void Mesh::fillHole()
 }
 
 
-void Mesh::earClimpy()
+void Mesh::earClimpyTest()
 {
  vector<Surface_mesh::Vertex> hole;
  hole=mHoles[2];
@@ -486,4 +486,318 @@ while(tmpHole.size()>3)
 
 
 }
+
+
+
+Vector3f getCoordVertex(Surface_mesh::Vertex v, vector<Surface_mesh::Vertex> &vert, vector<Vector3f> &coord)
+{
+    Vector3f vector;
+    for (int i=0; i<vert.size(); ++i)
+    {
+        if(v==vert[i])
+        {
+            vector=coord[i];
+            i=vert.size();
+        }
+    }
+
+    return vector;
+}
+
+
+Vector3f calcGeoCenter(vector<Surface_mesh::Vertex> &hole, vector<Surface_mesh::Vertex> &vert, vector<Vector3f> &coord)
+{
+    Vector3f G(0.,0.,0.);
+
+    for(int i = 0; i<hole.size(); ++i)
+    {
+        Vector3f V=getCoordVertex(hole[i],vert,coord);
+        G+=V;
+    }
+
+    G=G/hole.size();
+
+    return G;
+
+}
+
+bool isInTriangle(Vector3f& A, Vector3f& B, Vector3f& C,const Vector3f& M)
+{
+    Vector3f AB = B-A;
+    Vector3f AM = M-A;
+    Vector3f AC = C-A;
+
+    Vector3f BA = A-B;
+    Vector3f BM = M-B;
+    Vector3f BC = C-B;
+
+    Vector3f CA = A-C;
+    Vector3f CM = M-C;
+    Vector3f CB = B-C;
+
+    float v0m = (AB.cross(AM)).dot(AM.cross(AC));
+    float v1m = (BA.cross(BM)).dot(BM.cross(BC));
+    float v2m = (CA.cross(CM)).dot(CM.cross(CB));
+
+    if(v0m>=0 && v1m>=0 && v2m>=0)
+        return true;
+    else
+        return false;
+
+}
+
+
+
+
+
+
+bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Vertex& v2,
+           vector<Surface_mesh::Vertex> &vert , vector<Vector3f> &coord, const Vector3f& G,
+           vector<Surface_mesh::Vertex> &hole)
+{
+    bool validAngle = false;
+    bool inHole = false;
+    bool notIntersec = true;
+
+    Vector3f vec0=getCoordVertex(v0,vert,coord);
+    Vector3f vec1=getCoordVertex(v1,vert,coord);
+    Vector3f vec2=getCoordVertex(v2,vert,coord);
+
+    //contrainte d'angle
+    Vector3f AB = vec0-vec1;
+    Vector3f AC = vec2-vec1;
+
+    double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
+
+    double angle=acos(cosBAC);
+
+    if(angle < M_PI)
+    {
+        validAngle = true;
+        std::cout <<"ANGLE OK"<< std::endl;
+    }
+
+    //contrainte d'appartenance au trou
+
+//    Vector3f GV1 = G + vec1;
+//    Vector3f GV0 = G + vec0;
+//    Vector3f GV2 = G + vec2;
+
+//    if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
+//       {
+//        inHole=true;
+//        std::cout <<"in Hole OK"<< std::endl;
+//       }
+
+    Vector3f m = vec0;
+    if((isInTriangle(vec1,G,vec0,m)==true) || (isInTriangle(vec1,G,vec2,m)==true) )
+    {
+          inHole=true;
+          std::cout <<"in Hole OK"<< std::endl;
+    }
+
+    if(validAngle==true && inHole==true)
+    {
+         //contrainte d'intersection
+         vector<Surface_mesh::Vertex> otherVert;
+
+         for(int i=0; i<hole.size();++i)
+         {
+             if(hole[i]!=v0 && hole[i]!=v1 && hole[i]!=v2)
+                 otherVert.push_back(hole[i]);
+         }
+
+
+         for(int j=0; j<otherVert.size(); ++j)
+         {
+            Vector3f M = getCoordVertex(otherVert[j],vert,coord);
+
+            if (isInTriangle(vec0,vec1,vec2,M)==true)
+            {
+                notIntersec=false;
+                j=otherVert.size();
+
+            }
+         }
+
+         return notIntersec;
+
+
+    }
+    else
+        return false;
+
+
+}
+
+void twoNextVert(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Vertex& v2, vector<Surface_mesh::Vertex> &hole)
+{
+    int ind;
+    for(int i=0; i<hole.size();++i)
+    {
+        if(hole[i]==v0)
+        {
+            ind=i;
+            i=hole.size();
+        }
+    }
+
+
+    if(ind<hole.size()-2)
+    {
+        v1=hole[ind+1];
+        v2=hole[ind+2];
+    }
+    else
+    {
+        if(ind==hole.size()-2)
+        {
+            v1=hole[ind+1];
+            v2=hole[0];
+        }
+        else
+        {
+            v1=hole[0];
+            v2=hole[1];
+        }
+    }
+}
+
+void Mesh::earClimpy()
+{
+    vector<Surface_mesh::Vertex> hole;
+    vector<Surface_mesh::Vertex> newHole;
+    hole=mHoles[2];
+    newHole=hole;
+    vector<Vector3f> coordVertHole;
+    Vector3f geoCenter(0.,0.,0.);
+    int lim=2;
+    int c=0;
+
+       for(int i=0; i<hole.size();++i)
+       {
+            for(int j=0; j<posVert.size();++j)
+           {
+
+                if(hole[i]==posVert[j])
+               {
+                coordVertHole.push_back(mPositions[j]);
+                j=posVert.size();
+
+               }
+           }
+       }
+
+
+     geoCenter = calcGeoCenter(newHole,hole,coordVertHole);
+
+
+      Surface_mesh::Vertex v0, v1, v2;
+
+//      while(newHole.size()>3)
+//      {
+//            for(int i=0; i<newHole.size(); i++)
+//            {
+////                if(c==1)
+////                    std::cout << "test" << std::endl;
+
+//                v0=newHole[i];
+//                twoNextVert(v0,v1,v2,newHole);
+
+//                if(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
+//                {
+//                    i=newHole.size();
+//                }
+
+//            }
+
+//            while(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
+//            {
+//                mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
+//                vector<Surface_mesh::Vertex> tmpHole;
+
+//                //////////////////
+//                std::cout << v0 <<"," << v1 << "," << v2 << std::endl;
+
+//                c++;
+//                if(c==lim)
+//                    break;
+//                //////////////////
+
+//                for (int j=0; j<newHole.size();++j)
+//                {
+//                    if(newHole[j]!=v1)
+//                        tmpHole.push_back(newHole[j]);
+//                }
+
+//                newHole=tmpHole;
+//                geoCenter = calcGeoCenter(newHole,hole,coordVertHole);
+//                twoNextVert(v0,v1,v2,newHole);
+//            }
+
+//            //////////////////
+//            if(c==lim)
+//                break;
+//            //////////////////
+
+//      }
+
+//      if(isEar(hole[2],hole[4],hole[5],hole,coordVertHole,geoCenter,newHole)==true)
+//        std::cout <<"yes"<< std::endl;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

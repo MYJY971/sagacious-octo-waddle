@@ -574,17 +574,11 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
 
     //contrainte d'appartenance au trou
 
-//    Vector3f GV1 = G + vec1;
-//    Vector3f GV0 = G + vec0;
-//    Vector3f GV2 = G + vec2;
-
-//    if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
-//       {
-//        inHole=true;
-//        std::cout <<"in Hole OK"<< std::endl;
-//       }
 
     Vector3f m = (vec0+vec2)/2;
+//    std::cout << "v0=" << vec0 << std::endl;
+//    std::cout << "v2=" << vec2 << std::endl;
+//    std::cout << "m="  << m << std::endl;
     if((isInTriangle(vec1,G,vec0,m)==true) || (isInTriangle(vec1,G,vec2,m)==true) )
     {
           inHole=true;
@@ -693,8 +687,11 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
 
       Surface_mesh::Vertex v0, v1, v2;
 
-      while(newHole.size()>3)
+      bool findEar/*=true*/;
+
+      while(newHole.size()>3 )
       {
+          findEar=false;
 
             for(int i=0; i<newHole.size(); i++)
             {
@@ -706,41 +703,52 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
                 ///////////////////////////////
                 if(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
                 {
-
+                    findEar=true;
                     i=newHole.size();
                 }
 
             }
-
-            while(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
+            if(findEar==true)
             {
 
-                mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
-                vector<Surface_mesh::Vertex> tmpHole;
-
-                for (int j=0; j<newHole.size();++j)
+                while(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
                 {
 
-                    if(newHole[j]!=v1)
-                        tmpHole.push_back(newHole[j]);
+                    mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
+                    vector<Surface_mesh::Vertex> tmpHole;
+
+                    for (int j=0; j<newHole.size();++j)
+                    {
+
+                        if(newHole[j]!=v1)
+                            tmpHole.push_back(newHole[j]);
+                    }
+
+                    newHole=tmpHole;
+                    geoCenter = calcGeoCenter(newHole,hole,coordVertHole);
+                    twoNextVert(v0,v1,v2,newHole);
+
                 }
 
-                newHole=tmpHole;
-                geoCenter = calcGeoCenter(newHole,hole,coordVertHole);
-                twoNextVert(v0,v1,v2,newHole);
+
+
 
             }
+            else
+            {
 
+                std::cout<<"pas d'oreille"<<std::endl;
+                return;
 
+            }
       }
 
-
-      v0=newHole[0];
+      if(findEar=true)
+      {v0=newHole[0];
       v1=newHole[1];
       v2=newHole[2];
       mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
-
-
+    }
 
 }
 
@@ -755,7 +763,7 @@ void Mesh::fillHole(int choix)
     if(choix==1)
     {
         for (int i=0; i<mHoles.size(); ++i)
-            Mesh::earClimpy(mHoles[0]);
+            Mesh::earClimpy(mHoles[i]);
     }
 }
 

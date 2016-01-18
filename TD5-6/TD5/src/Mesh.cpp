@@ -561,12 +561,13 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
     Vector3f vec2=getCoordVertex(v2,vert,coord);
 
     //contrainte d'angle
-    Vector3f AB = vec0-vec1;
-    Vector3f AC = vec2-vec1;
+    Vector3f AB = vec1-vec2;
+    Vector3f AC = vec0-vec1;
 
     double cosBAC=( AB.dot(AC) ) / (AB.norm() * AC.norm());
 
     double angle=acos(cosBAC);
+    std::cout << "pi="<<M_PI<<" et angle ("<<v0<<","<<v1<<","<<v2<<") ="<<angle<<std::endl;
 
     if(angle < M_PI)
     {
@@ -584,7 +585,7 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
     {
           inHole=true;
           ///////////////////////////////
-          //std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est à l'interieur du trou" << std::endl;
+          ////std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est à l'interieur du trou" << std::endl;
           ///////////////////////////////
 
     }
@@ -621,7 +622,7 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
 
     }
     else
-    {   std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") intersecte une face extérieure, Oreille Invalide" << std::endl;
+    {   //std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") intersecte une face extérieure, Oreille Invalide" << std::endl;
         return false;
     }
 
@@ -720,7 +721,7 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
                 {
 
                     mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
-                    std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est une oreille valide, Construction de la face" << std::endl;
+                    //std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est une oreille valide, Construction de la face" << std::endl;
                     vector<Surface_mesh::Vertex> tmpHole;
 
                     for (int j=0; j<newHole.size();++j)
@@ -768,8 +769,8 @@ void Mesh::fillHole(int choix)
     }
     if(choix==1)
     {
-        for (int i=0; i<mHoles.size(); ++i)
-            Mesh::earClimpy(mHoles[i]);
+        //for (int i=0; i<mHoles.size(); ++i)
+            Mesh::earClimpy(mHoles[2]);
     }
 }
 

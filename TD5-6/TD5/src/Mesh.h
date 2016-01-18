@@ -21,6 +21,7 @@ public:
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpyTest();
     void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
+    void nbConnexTest(Shader *shader);
 
     void fillHole(int choix);
 
@@ -38,6 +39,7 @@ private:
     std::vector<surface_mesh::Surface_mesh::Vertex> posVert;
 
     std::vector< std::vector<surface_mesh::Surface_mesh::Vertex> > mHoles;
+    std::vector< std::vector<surface_mesh::Surface_mesh::Vertex> > mConnex;
 
     //surface_mesh::Surface_mesh mHalfEdge;
 

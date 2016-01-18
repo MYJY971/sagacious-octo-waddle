@@ -78,8 +78,8 @@ void initGL()
     //mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
     //mesh->load(PGHP_DIR"/data/Kate.obj");
     //mesh->load(PGHP_DIR"/data/PhantomLite.obj");
-    mesh->load(PGHP_DIR"/data/bunny_stanford.obj");
-    //mesh->load(PGHP_DIR"/data/sphere.obj");
+    //mesh->load(PGHP_DIR"/data/bunny_stanford.obj");
+    mesh->load(PGHP_DIR"/data/sphere.obj");
     //mesh->load(PGHP_DIR"/data/sphere2.obj");
     //mesh->load(PGHP_DIR"/data/trouComplexe5.obj");
     //mesh->load(PGHP_DIR"/data/icosphere_hole.obj");

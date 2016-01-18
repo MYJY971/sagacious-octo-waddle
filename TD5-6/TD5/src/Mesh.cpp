@@ -291,6 +291,7 @@ void Mesh::detectHole(Shader *shader)
 
 void Mesh::displayHoles()
 {
+    std::cout << "___________" << std::endl;
     for(int i=0; i<mHoles.size();++i)
     {
         for(int j=0; j<mHoles[i].size(); ++j)
@@ -583,7 +584,7 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
     {
           inHole=true;
           ///////////////////////////////
-          std::cout << "not in hole ok" << std::endl;
+          //std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est à l'interieur du trou" << std::endl;
           ///////////////////////////////
 
     }
@@ -611,6 +612,8 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
                 j=otherVert.size();
 
             }
+
+
          }
 
          return notIntersec;
@@ -618,7 +621,9 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
 
     }
     else
+    {   std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") intersecte une face extérieure, Oreille Invalide" << std::endl;
         return false;
+    }
 
 
 }
@@ -699,7 +704,7 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
                 v0=newHole[i];
                 twoNextVert(v0,v1,v2,newHole);
                 ///////////////////////////////
-                std::cout << v0 << std::endl;
+                std::cout <<"Sommet de départ :"<< v0 << std::endl;
                 ///////////////////////////////
                 if(isEar(v0,v1,v2,hole,coordVertHole,geoCenter,newHole)==true)
                 {
@@ -715,6 +720,7 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
                 {
 
                     mIndices.push_back(Vector3i(v0.idx(), v1.idx(), v2.idx()));
+                    std::cout << "("<<v0<<", "<<v1<<", "<<v2<<") est une oreille valide, Construction de la face" << std::endl;
                     vector<Surface_mesh::Vertex> tmpHole;
 
                     for (int j=0; j<newHole.size();++j)

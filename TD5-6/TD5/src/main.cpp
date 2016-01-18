@@ -78,12 +78,12 @@ void initGL()
     //mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
     //mesh->load(PGHP_DIR"/data/Kate.obj");
     //mesh->load(PGHP_DIR"/data/PhantomLite.obj");
-    //mesh->load(PGHP_DIR"/data/bunny.obj");
+    mesh->load(PGHP_DIR"/data/bunny_stanford.obj");
     //mesh->load(PGHP_DIR"/data/sphere.obj");
     //mesh->load(PGHP_DIR"/data/sphere2.obj");
     //mesh->load(PGHP_DIR"/data/trouComplexe5.obj");
-    //mesh->load(PGHP_DIR"/data/HoleMoreComplex.obj");
-    mesh->load(PGHP_DIR"/data/HoleMoreComplex1.obj");
+    //mesh->load(PGHP_DIR"/data/icosphere_hole.obj");
+
     mesh->makeUnitary();
     mesh->init(&mBlinn);
 
@@ -269,7 +269,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
         else if(key == GLFW_KEY_B)
         {
-
+            mesh->detectHole(&mHole);
+            mesh->init(&mBlinn);
             //mesh->holeTriangulation();
             mesh->fillHole(0);
             mesh->init(&mBlinn);
@@ -284,6 +285,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             mesh->detectHole(&mHole);
             mesh->init(&mBlinn);
 //            mesh->earClimpy();
+            mesh->displayHoles();
             mesh->fillHole(1);
             mesh->init(&mBlinn);
 

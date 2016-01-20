@@ -1,0 +1,81 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[backend=bibtex,
+style=numeric,
+bibencoding=ascii
+%style=alphabetic
+%style=reading
+]{biblatex}
+\addbibresource{references}
+
+
+\title{Modélisation Géométrique}
+\author{...}
+\date{\today}
+
+
+
+\lstset { %
+    language=C++,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green},
+    morecomment=[l][\color{magenta}]{\#}
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+
+
+
+\section{Environnement}
+Nous travaillons sur un programme C++, ayant pour base les codes sources écrit par Gael Guennebaud \cite{GGSite} fournit dans le cadre de l'UE "Programmation Graphique Haute Performance" \cite{GGPghp} dont il est responsable.Le code fourni nous permet de visualiser un mesh 3D au format .obj . Pour l'année 2015, deux bibliothèques sont utilisées: GLM\cite{GLM} pour les caluls mathématiques ,  et Surface mesh\cite{}. Par la suite, en guise de correction pour la visualisation d'un nuage de point et de la décimation de ce dernier, notre chargé de TD pour la première partie du projet, Boris Raymond \cite{BRSite}, nous a réadapté ce code avec la bibliothèque Eigen \cite{GGaward,eigen} dont Gael Guennebaud est le Co-créateur. Nous avons choisi de continué notre projet en partant de la correction fourni, qui comprend les classe PointCloud.cpp et Octree.cpp pour la visualisation et la décimation. 
+
+
+\section{D'un nuage de points au maillage 3D}
+
+\subsection{Visualisation d'un nuage de points}
+Nous avons en entrée un nuage de point au format ".scn" qui a été obtenue via un scanner laser. La première étape est alors de pouvoir lire ce fichier.scn afin d'effectuer par la suite des opérations sur l'objet représenté par le nuage. Une bonne façon de controler cette étape est donc de pouvoir visualiser le nuage de point sur notre programme.\\
+Chaque ligne du fichier .scn se compose de 6 valeurs numériques caractériques d'un points donnés : les trois première valeurs representent ses coordonnées spatiales et les trois suivante les coordonnée de la normale à ce point.
+Ses donnée sont récupéré par notre programme à l'aide de la methode et sont placé dans les attribut mPositions et mNormals de la classe \textit{PointCloud}\\ \textit{void PointCloud::load(const std::string\& filename)}
+
+\begin{algorithm}[H]
+ \KwData{this text}
+ \KwResult{how to write algorithm with \LaTeX2e }
+ initialization\;
+ \While{not at end of this document}{
+  read current\;
+  \eIf{understand}{
+   go to next section\;
+   current section becomes this one\;
+   }{
+   go back to the beginning of current section\;
+  }
+ }
+ \caption{How to write algorithms}
+\end{algorithm}
+
+
+
+\newpage
+\subsection{Décimation}
+
+\subsection{Reconstruction}
+
+\section{Conclusion}
+%``I always thought something was fundamentally wrong with the universe'' \citep{adams1995hitchhiker}
+
+\medskip
+
+\printbibliography
+
+\end{document}

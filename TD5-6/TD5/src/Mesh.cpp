@@ -176,6 +176,121 @@ void Mesh::drawEdges(Shader *shader)
 
     }
 
+///////////////////////////////////////
+void Mesh::nbConnexTest(Shader *shader)
+{
+    Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
+    Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
+
+    vector<Surface_mesh::Vertex> stockCompCon;
+    vector<Surface_mesh::Vertex> stockVertTmp;
+
+    vector<Surface_mesh::Face> stockFace;
+
+    vector< vector<Surface_mesh::Face> > nbCo;
+
+    Surface_mesh::Halfedge_iterator hei,hei2;
+    Surface_mesh::Edge_iterator ei;
+    Surface_mesh::Vertex startV,endV;
+    Surface_mesh::Edge e;
+    Surface_mesh::Face f1,f2;
+
+    hei=mHalfEdge.halfedges_begin();
+    e=mHalfEdge.edge(*hei);
+    startV=mHalfEdge.vertex(e,0);
+
+    bool adjF1=false;
+    bool adjF2=false;
+
+    for(ei=mHalfEdge.edges_begin(); ei!=mHalfEdge.edges_end(); ++ei)
+    {
+        f1=mHalfEdge.face(*ei,0);
+        f2=mHalfEdge.face(*ei,1);
+
+        //std::cout<<"f1="<< f1 <<" et f2="<<f2<< std::endl;
+
+        if(stockFace.size()==0)
+        {
+            stockFace.push_back(f1);
+            stockFace.push_back(f2);
+        }
+        else
+        {
+            for(int i=0; i<stockFace.size();++i)
+            {
+                if(f1==stockFace[i])
+                    adjF1=true;
+
+            }
+            for(int i=0; i<stockFace.size();++i)
+            {
+                if(f2==stockFace[i])
+                    adjF2=true;
+
+            }
+
+            if(adjF1==true && adjF2==false)
+                stockFace.push_back(f2);
+            if(adjF1==false && adjF2==true)
+                stockFace.push_back(f1);
+            if(adjF1==true || adjF2==true)
+            {
+                stockVertTmp.push_back(mHalfEdge.vertex(*ei,0));
+                stockVertTmp.push_back(mHalfEdge.vertex(*ei,1));
+            }
+
+
+            if(adjF1==false && adjF2==false)
+            {
+
+                bool insert;
+                for(int j=0; j<stockVertTmp.size();++j)
+                {
+                    insert=true;
+
+                    for(int i=0; i<stockCompCon.size(); ++i)
+                    {
+                        if(stockVertTmp[j]==stockCompCon[i])
+                            insert=false;
+                    }
+
+                    if(insert==true)
+                        stockCompCon.push_back(stockVertTmp[j]);
+                }
+
+                mConnex.push_back(stockCompCon);
+                ei=mHalfEdge.edges_end();
+            }
+
+        }
+        adjF1=false;
+        adjF2=false;
+    }
+
+
+
+
+    std::cout<<"nb comp connex = "<< mConnex.size() << std::endl;
+
+
+    for(int i=0; i<mConnex.size();++i)
+    {
+
+        for(int j=0; j<mConnex[i].size();++j)
+        {
+            for(int k=0; k<posVert.size(); ++k)
+            {
+                if(mConnex[i][j]==posVert[k])
+                    mColors[k]==Vector3f(0.,1.,0.);
+            }
+        }
+    }
+
+
+
+}
+///////////////////////////////////////
+
 void Mesh::detectHole(Shader *shader)
 {
 
@@ -769,11 +884,10 @@ void Mesh::fillHole(int choix)
     }
     if(choix==1)
     {
-        //for (int i=0; i<mHoles.size(); ++i)
-            Mesh::earClimpy(mHoles[2]);
+        for (int i=0; i<mHoles.size(); ++i)
+            Mesh::earClimpy(mHoles[i]);
     }
 }
-
 
 
 

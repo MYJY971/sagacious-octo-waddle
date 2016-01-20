@@ -76,10 +76,14 @@ void initGL()
     //Mesh
     mesh = new Mesh();
     //mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
-    //mesh->load(PGHP_DIR"/data/Kate.obj");
+    //mesh->load(PGHP_DIR"/data/Kate_leg.obj");
+    //mesh->load(PGHP_DIR"/data/Kate_fur.obj");
     //mesh->load(PGHP_DIR"/data/PhantomLite.obj");
     //mesh->load(PGHP_DIR"/data/bunny_stanford.obj");
-    mesh->load(PGHP_DIR"/data/sphere.obj");
+    //mesh->load(PGHP_DIR"/data/sphere.obj");
+    //mesh->load(PGHP_DIR"/data/cube.obj");
+    mesh->load(PGHP_DIR"/data/ObjConnexe.obj");
+
     //mesh->load(PGHP_DIR"/data/sphere2.obj");
     //mesh->load(PGHP_DIR"/data/trouComplexe5.obj");
     //mesh->load(PGHP_DIR"/data/icosphere_hole.obj");
@@ -363,6 +367,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
         }
 
+        else if(key == GLFW_KEY_O)
+        {
+            mesh->nbConnexTest(&mBlinn);
+        }
 
 
 

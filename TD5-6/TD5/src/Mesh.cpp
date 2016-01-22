@@ -259,6 +259,16 @@ void Mesh::nbConnexTest(Shader *shader)
                 }
 
                 mConnex.push_back(stockCompCon);
+
+                vector<Surface_mesh::Vertex> stockCompConTemp;
+                vector<Surface_mesh::Vertex> stockVertTmp2;
+                stockCompCon=stockCompConTemp;
+                stockVertTmp=stockVertTmp2;
+
+                vector<Surface_mesh::Face> stockFaceTmp;
+                stockFace=stockFaceTmp;
+
+
                 ei=mHalfEdge.edges_end();
             }
 
@@ -273,18 +283,18 @@ void Mesh::nbConnexTest(Shader *shader)
     std::cout<<"nb comp connex = "<< mConnex.size() << std::endl;
 
 
-    for(int i=0; i<mConnex.size();++i)
-    {
+//    for(int i=0; i<mConnex.size();++i)
+//    {
 
-        for(int j=0; j<mConnex[i].size();++j)
-        {
-            for(int k=0; k<posVert.size(); ++k)
-            {
-                if(mConnex[i][j]==posVert[k])
-                    mColors[k]==Vector3f(0.,1.,0.);
-            }
-        }
-    }
+//        for(int j=0; j<mConnex[i].size();++j)
+//        {
+//            for(int k=0; k<posVert.size(); ++k)
+//            {
+//                if(mConnex[i][j]==posVert[k])
+//                    mColors[k]==Vector3f(0.,1.,0.);
+//            }
+//        }
+//    }
 
 
 

@@ -15,15 +15,14 @@ public:
     void draw(Shader *shader, bool drawEdges = false);
     void initEdges(Shader *shader);
     void drawEdges(Shader *shader);
-    void detectHole();
+    void detectHole(Shader *shader);
     void specifyVertexDataHole(Shader *shader);
     void displayHoles();
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpyTest();
-    void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
-    void nbConnexTest(Shader *shader);
+    void earClimpy();
 
-    void fillHole(int choix);
+    void fillHole();
 
     surface_mesh::Surface_mesh mHalfEdge;
 
@@ -39,21 +38,16 @@ private:
     std::vector<surface_mesh::Surface_mesh::Vertex> posVert;
 
     std::vector< std::vector<surface_mesh::Surface_mesh::Vertex> > mHoles;
-    std::vector< std::vector<surface_mesh::Surface_mesh::Vertex> > mConnex;
 
     //surface_mesh::Surface_mesh mHalfEdge;
 
     GLuint mIndicesBuffer;
     GLuint mIndicesBufferHole;
 
-    Eigen::Vector3f mDefaultColor;
+
     Shader *mShaderHole;
-    Shader *mCurrentShader;
     GLuint mVaoHole;
     GLuint mBufsHole[2];//Positions,Normals
-
-
-
 
 };
 

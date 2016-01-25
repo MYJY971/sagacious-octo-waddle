@@ -114,14 +114,21 @@ void initGL()
     cube->makeUnitary();
     cube->init(&mBlinn);
     mMeshes.push_back(cube);
-    //---------------------
     //2cube------------
     Mesh* twoCubes = new Mesh();
     twoCubes->load(PGHP_DIR"/data/twoCubes.obj");
     twoCubes->makeUnitary();
     twoCubes->init(&mBlinn);
     mMeshes.push_back(twoCubes);
+    //3compConnex------------
+    Mesh* troisConnex = new Mesh();
+    troisConnex->load(PGHP_DIR"/data/troisConnex.obj");
+    troisConnex->makeUnitary();
+    troisConnex->init(&mBlinn);
+    mMeshes.push_back(troisConnex);
+
     //---------------------
+
     mCurrentMesh = mMeshes.size()-1;
 
     //Octree
@@ -400,6 +407,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         else if(key == GLFW_KEY_O)
         {
             mMeshes[mCurrentMesh]->nbConnexTest();
+            //mMeshes[mCurrentMesh]->displayConnex();
         }
 
 

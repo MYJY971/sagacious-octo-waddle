@@ -16,6 +16,7 @@ public:
     void initEdges(Shader *shader);
     void detectHole();
     void displayHoles();
+    void displayConnex();
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void nbConnexTest();

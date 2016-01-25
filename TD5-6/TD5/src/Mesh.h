@@ -20,6 +20,7 @@ public:
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void nbConnexTest();
+    void nbConnexTest2();
 
     void fillHole(int choix);
 

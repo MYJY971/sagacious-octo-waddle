@@ -104,7 +104,7 @@ void Mesh::draw(Shader *shader, bool drawEdges)
 
 
 //Composantes connexes *****************************************************************************
-void Mesh::nbConnexTest()
+void Mesh::nbConnexTest2()
 {
     //remise a zero de mConnex pour éviter les doublons
     mConnex.erase(mConnex.begin(),mConnex.end());
@@ -123,6 +123,7 @@ void Mesh::nbConnexTest()
 
     for(vit=mHalfEdge.vertices_begin(); vit!=mHalfEdge.vertices_end(); ++vit)
     {
+        //////////////////////////////////
         cout <<"~~~~~~~~~~~~~~"<< endl;
         cout<< "->" <<*vit<<":"<<endl;
 
@@ -235,6 +236,172 @@ void Mesh::nbConnexTest()
     Mesh::init(mCurrentShader);
 
 }
+///test2//////////////////////////////////////
+//Composantes connexes *****************************************************************************
+void Mesh::nbConnexTest()
+{
+
+    //remise a zero de mConnex pour éviter les doublons
+    mConnex.erase(mConnex.begin(),mConnex.end());
+
+    vector<Surface_mesh::Vertex> component, tmpComp, stockVertices;
+
+    Surface_mesh::Edge_iterator eit;
+    Surface_mesh::Vertex_iterator vit;
+    Surface_mesh::Vertex_around_vertex_circulator vvit,vvend;
+
+    Surface_mesh::Vertex v,v0,v1,v2;
+
+
+    bool isCon,in, in0, in1;
+    //int ind;
+
+
+    for(vit=mHalfEdge.vertices_begin(); vit!=mHalfEdge.vertices_end(); ++vit)
+    {
+//////////////////////////////////////////////////////////////
+//        cout <<"~~~~~~~~~~~~~~"<< endl;
+//        cout<< "->" <<*vit<<":"<<endl;
+
+//        vvit=vvend=mHalfEdge.vertices(*vit);
+//        do{
+//            v=*vvit;
+//            cout<<v<<endl;
+//            ++vvit;
+//          }while(vvit!=vvend);
+
+////////////////////////////////////////////////////////////
+        isCon=false;
+
+        vvit=vvend=mHalfEdge.vertices(*vit);
+        //v=*vvit;
+
+        if(vit==mHalfEdge.vertices_begin())
+        {
+
+            component.push_back(*vit);
+
+            do{
+                v=*vvit;
+                component.push_back(v);
+                ++vvit;
+            }while(vvit!=vvend);
+
+            stockVertices=component;
+            mConnex.push_back(component);
+        }
+
+        else
+        {
+
+           tmpComp.push_back(*vit);
+           do{
+               v=*vvit;
+               tmpComp.push_back(v);
+               ++vvit;
+           }while(vvit!=vvend);
+
+            //Verifie si connecté à un sommet déjà parcouru
+           int ind=-1;
+           for(int i=0; i<mConnex.size();++i)
+           {
+
+                for(int j=0;j<mConnex[i].size();++j)
+                {
+
+                    for(int k=0; k<tmpComp.size();++k)
+                    {
+
+                        if(mConnex[i][j]==tmpComp[k])
+                        {
+                            ind=i;
+                            k=tmpComp.size();
+//                          j=mConnex[i].size();
+//                          i=mConnex.size();
+                        }
+
+                    }
+
+                    if(ind!=-1)
+                        break;
+                }
+                if(ind!=-1)
+                    break;
+           }
+
+           //si connecté alors remplir la composante concernée
+           if(ind!=-1)
+           {
+
+             for(int i=0; i<tmpComp.size();++i)
+             {
+                 in=false;
+
+                 for(int j=0; j<mConnex[ind].size();++j)
+                 {
+                    if(tmpComp[i]==mConnex[ind][j])
+                    {
+                        in=true;
+                        j=mConnex[ind].size();
+                    }
+                 }
+
+                 if(in==false)
+                 {
+                     mConnex[ind].push_back(tmpComp[i]);
+                 }
+
+             }
+           }
+           else //Sinon, création d'une nouvelle composante
+           {
+
+            mConnex.push_back(tmpComp);
+
+           }
+
+           tmpComp.erase(tmpComp.begin(),tmpComp.end());
+
+
+
+           //////
+
+
+
+
+
+        }
+
+            ////////////////////////////////////////////
+
+
+    }
+    //mConnex.push_back(component);
+    //cout <<"~~~~~~~~~~~~~~"<< endl;
+    cout <<"nb composantes connexes :"<< mConnex.size() << endl;
+
+//    //color
+//    for(int i=0; i<mConnex.size();++i)
+//    {
+
+//        for(int j=0; j<mConnex[i].size();++j)
+//        {
+//            for(int k=0; k<posVert.size();++k)
+//            {
+//                if(posVert[k]==mConnex[i][j])
+//                    mColors[k]=Vector3f(float(i)/(mConnex.size()-1),float(i)/(mConnex.size()-1),float(i)/(mConnex.size()-1));
+
+
+//            }
+//        }
+
+//    }
+//    Mesh::init(mCurrentShader);
+
+}
+
+
+///////////////////////////////////////////////
 //Afficher les sommets des Composantes connexes******************************************************************
 
 void Mesh::displayConnex()

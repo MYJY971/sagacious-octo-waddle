@@ -14,14 +14,11 @@ public:
     void init(Shader *shader);
     void draw(Shader *shader, bool drawEdges = false);
     void initEdges(Shader *shader);
-    void drawEdges(Shader *shader);
     void detectHole();
-    void specifyVertexDataHole(Shader *shader);
     void displayHoles();
     void holeTriangulation(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
-    void earClimpyTest();
     void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
-    void nbConnexTest(Shader *shader);
+    void nbConnexTest();
 
     void fillHole(int choix);
 

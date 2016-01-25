@@ -101,206 +101,165 @@ void Mesh::draw(Shader *shader, bool drawEdges)
 
 
 
-void Mesh::specifyVertexDataHole(Shader *shader)
+
+
+//Composantes connexes *****************************************************************************
+void Mesh::nbConnexTest()
 {
-    mShaderHole = shader;
+    //remise a zero de mConnex pour éviter les doublons
+    mConnex.erase(mConnex.begin(),mConnex.end());
 
-    glBindBuffer(GL_ARRAY_BUFFER, mBufsHole[0]);
-    int pos_loc = shader->getAttribLocation("vtx_position");
-    glEnableVertexAttribArray(pos_loc);
-    glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
+    vector<Surface_mesh::Vertex> component, tmp;
 
-    glBindBuffer(GL_ARRAY_BUFFER, mBufsHole[1]);
-    int normal_loc = shader->getAttribLocation("vtx_normal");
-    if(normal_loc>=0){
-        glEnableVertexAttribArray(normal_loc);
-        glVertexAttribPointer(normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3f), (void*)0);
-    }
-}
+    Surface_mesh::Edge_iterator eit;
+    Surface_mesh::Vertex_iterator vit;
+    Surface_mesh::Vertex_around_vertex_circulator vvit,vvend;
+
+    Surface_mesh::Vertex v,v0,v1,v2;
 
 
+    bool isCon,in, in0, in1;
 
-void Mesh::initEdges(Shader *shader)
-{
+    //cout <<"~~~~~~~~~~~~~~"<< endl;
 
-
-    glGenVertexArrays(1,&mVaoHole);
-    glGenBuffers(2,mBufsHole);
-
-    glBindVertexArray(mVaoHole);
-
-    glBindBuffer(GL_ARRAY_BUFFER,mBufsHole[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mPositionsHole.size(), mPositionsHole.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER,mBufsHole[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f)*mNormalsHole.size(), mNormalsHole.data(), GL_STATIC_DRAW);
-
-    specifyVertexDataHole(shader);
-
-
-
-
-//    glBindVertexArray(0);
-
-
-//    glBindVertexArray(mVaoHole);
-
-    glGenBuffers(1, &mIndicesBufferHole);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndicesBufferHole);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Vector3i)*mIndicesHole.size(), mIndicesHole.data(),  GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-
-    mReadyHole=true;
-
-
-}
-
-void Mesh::drawEdges(Shader *shader)
+    for(vit=mHalfEdge.vertices_begin(); vit!=mHalfEdge.vertices_end(); ++vit)
     {
+        isCon=false;
 
-    if (!mReadyHole) {
-        //std::cerr<<"Warning: PointCloud not ready for rendering" << std::endl;
-        return;
-    }
-          glBindVertexArray(mVaoHole);
-          if(mShaderHole->id() != shader->id()){
-              specifyVertexDataHole(shader);
-          }
+        vvit=vvend=mHalfEdge.vertices(*vit);
+        //v=*vvit;
 
-          //glDrawArrays(GL_TRIANGLES, 0, mPositionsHole.size());
-          glDrawElements(GL_TRIANGLES, mIndicesHole.size()*sizeof(Vector3i),  GL_UNSIGNED_INT, 0);
-
-          glBindVertexArray(0);
-
-
-
-    }
-
-///////////////////////////////////////
-void Mesh::nbConnexTest(Shader *shader)
-{
-    Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
-    Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
-
-    vector<Surface_mesh::Vertex> stockCompCon;
-    vector<Surface_mesh::Vertex> stockVertTmp;
-
-    vector<Surface_mesh::Face> stockFace;
-
-    vector< vector<Surface_mesh::Face> > nbCo;
-
-    Surface_mesh::Halfedge_iterator hei,hei2;
-    Surface_mesh::Edge_iterator ei;
-    Surface_mesh::Vertex startV,endV;
-    Surface_mesh::Edge e;
-    Surface_mesh::Face f1,f2;
-
-    hei=mHalfEdge.halfedges_begin();
-    e=mHalfEdge.edge(*hei);
-    startV=mHalfEdge.vertex(e,0);
-
-    bool adjF1=false;
-    bool adjF2=false;
-
-    for(ei=mHalfEdge.edges_begin(); ei!=mHalfEdge.edges_end(); ++ei)
-    {
-        f1=mHalfEdge.face(*ei,0);
-        f2=mHalfEdge.face(*ei,1);
-
-        //std::cout<<"f1="<< f1 <<" et f2="<<f2<< std::endl;
-
-        if(stockFace.size()==0)
+        if(vit==mHalfEdge.vertices_begin())
         {
-            stockFace.push_back(f1);
-            stockFace.push_back(f2);
+            component.push_back(*vit);
+
+            do{
+                v=*vvit;
+                component.push_back(v);
+                ++vvit;
+            }while(vvit!=vvend);
         }
+
         else
         {
-            for(int i=0; i<stockFace.size();++i)
+            for(int i=0; i<component.size();++i)
             {
-                if(f1==stockFace[i])
-                    adjF1=true;
-
-            }
-            for(int i=0; i<stockFace.size();++i)
-            {
-                if(f2==stockFace[i])
-                    adjF2=true;
-
+                if(*vit==component[i])
+                    isCon=true;
             }
 
-            if(adjF1==true && adjF2==false)
-                stockFace.push_back(f2);
-            if(adjF1==false && adjF2==true)
-                stockFace.push_back(f1);
-            if(adjF1==true || adjF2==true)
+            if(isCon)
             {
-                stockVertTmp.push_back(mHalfEdge.vertex(*ei,0));
-                stockVertTmp.push_back(mHalfEdge.vertex(*ei,1));
-            }
+                do{
 
+                    in=false;
+                    v=*vvit;
 
-            if(adjF1==false && adjF2==false)
-            {
-
-                bool insert;
-                for(int j=0; j<stockVertTmp.size();++j)
-                {
-                    insert=true;
-
-                    for(int i=0; i<stockCompCon.size(); ++i)
+                    for(int i=0; i<component.size();++i)
                     {
-                        if(stockVertTmp[j]==stockCompCon[i])
-                            insert=false;
+                        if(v==component[i])
+                            in=true;
                     }
 
-                    if(insert==true)
-                        stockCompCon.push_back(stockVertTmp[j]);
-                }
+                    if(in==false)
+                        component.push_back(v);
 
-                mConnex.push_back(stockCompCon);
+                    ++vvit;
 
-                vector<Surface_mesh::Vertex> stockCompConTemp;
-                vector<Surface_mesh::Vertex> stockVertTmp2;
-                stockCompCon=stockCompConTemp;
-                stockVertTmp=stockVertTmp2;
+                  }while(vvit!=vvend);
+            }
+            else
+            {
+                mConnex.push_back(component);
+                component.erase(component.begin(),component.end());
+                component.push_back(*vit);
 
-                vector<Surface_mesh::Face> stockFaceTmp;
-                stockFace=stockFaceTmp;
-
-
-                ei=mHalfEdge.edges_end();
+                do{
+                    v=*vvit;
+                    component.push_back(v);
+                    ++vvit;
+                }while(vvit!=vvend);
             }
 
         }
-        adjF1=false;
-        adjF2=false;
+
+            ////////////////////////////////////////////
+
+        /*in0=false;
+        in1=false;
+
+        v0=mHalfEdge.vertex(*eit,0);
+        v1=mHalfEdge.vertex(*eit,1);
+
+        vvit=vvend=mHalfEdge.vertices(v0);
+
+        //cout <<*eit<< "-> ("<< v0 <<","<< v1 <<")" << endl;
+
+        do{
+            v2=*vvit;
+            cout <<"~v="<<v2<<endl;
+            ++vvit;
+        }while(vvit!=vvend)*///;
+
+
+        //cout << "---"<<endl;
+//        if(eit==mHalfEdge.edges_begin())
+//        {
+//            component.push_back(v0);
+//            component.push_back(v1);
+//        }
+
+//        else
+//        {
+//            for(int i=0; i<component.size();++i)
+//            {
+//                if(component[i]==v0)
+//                    in0=true;
+
+//                if(component[i]==v1)
+//                    in1=true;
+//            }
+
+//            if(in0==true && in1==false)
+//                component.push_back(v1);
+
+//            if(in0==false && in1==true)
+//                component.push_back(v0);
+
+//            if(in0==false && in1==false)
+//            {
+//                cout<<"change!"<<endl;
+//                mConnex.push_back(component);
+//                component.erase(component.begin(),component.end());
+//                component.push_back(v0);
+//                component.push_back(v1);
+//            }
+
+//        }
+
+        //cout <<*eit<< "-> ("<< v0 <<","<< v1 <<")" << endl;
     }
+    mConnex.push_back(component);
+    //cout <<"~~~~~~~~~~~~~~"<< endl;
+    cout <<"nb composantes connexes :"<< mConnex.size() << endl;
 
 
-
-
-    std::cout<<"nb comp connex = "<< mConnex.size() << std::endl;
-
-
+    //color
 //    for(int i=0; i<mConnex.size();++i)
 //    {
-
-//        for(int j=0; j<mConnex[i].size();++j)
+//        for(int j=0; j<mConnex.size();++j)
 //        {
-//            for(int k=0; k<posVert.size(); ++k)
+//            for(int k=0; k<posVert.size();++k)
 //            {
-//                if(mConnex[i][j]==posVert[k])
-//                    mColors[k]==Vector3f(0.,1.,0.);
+//                if(posVert[k]==mConnex[i][j])
+//                    mColors[k]=Vector3f(255,0,255);//Vector3f(float(1/i),float(1/i),float(1/i));
 //            }
 //        }
 //    }
-
-
+//    Mesh::init(mCurrentShader);
 
 }
-///////////////////////////////////////
+//Detection de trou**********************************************************************************
 
 void Mesh::detectHole()
 {
@@ -308,11 +267,7 @@ void Mesh::detectHole()
     mHoles.erase(mHoles.begin(),mHoles.end());
 
 
-    // vertex properties
-    std::vector<Vector3f> stockPos;
-
-    //Surface_mesh::Vertex_property<Point> vertices = mHalfEdge.get_vertex_property<Point>("v:point");
-    //Surface_mesh::Vertex_property<Point> vnormals = mHalfEdge.get_vertex_property<Point>("v:normal");
+    //std::vector<Vector3f> stockPos;
 
     Surface_mesh::Halfedge_iterator hei;
 
@@ -379,12 +334,6 @@ void Mesh::detectHole()
                 }
 
 
-
-//            std::cout<<"vbegin="<<vbegin<<std::endl;
-//            std::cout<<"vend="<<vend<<std::endl;
-//            std::cout<<"vbegintest="<<vbegintest<<std::endl;
-//            std::cout<<"vend="<<vendtest<<std::endl;
-
                 mHoles.push_back(stockHole);
                 nbHole++;
             }
@@ -426,6 +375,8 @@ void Mesh::detectHole()
     Mesh::init(mCurrentShader);
 
 }
+
+//Afficher les sommets des trous******************************************************************
 
 void Mesh::displayHoles()
 {
@@ -506,137 +457,9 @@ void Mesh::holeTriangulation(vector<Surface_mesh::Vertex> &hole)
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//EarClimpy***********************************************************************************************************/
 
-void Mesh::earClimpyTest()
-{
- vector<Surface_mesh::Vertex> hole;
- hole=mHoles[2];
- vector<Vector3f> vertexHole;
- Vector3f geoCenter(0.,0.,0.);
-
-
-
-
-    Vector3f v0,v1,v2;
-    for(int i=0; i<hole.size();++i)
-    {
-         for(int j=0; j<posVert.size();++j)
-        {
-
-             if(hole[i]==posVert[j])
-            {
-             std::cout << "hole["<< i <<"] = " << hole[i]  << std::endl;
-             vertexHole.push_back(mPositions[j]);
-             geoCenter+=mPositions[j];
-             j=posVert.size();
-
-            }
-        }
-    }
-
-    geoCenter = geoCenter/hole.size();
-
-
-
-bool isEar = false;
-
-vector<Surface_mesh::Vertex> tmpHole=hole;
-//vector<Surface_mesh::Vertex> newHole;
-
-Surface_mesh::Vertex sv0, sv1, sv2;
-Vector3f vStart;
-int i =0;
-int c= 0;
-while(tmpHole.size()>3)
-{
-
-        while( ( tmpHole[i+2]!=tmpHole[tmpHole.size()-1]) && isEar==false)
-        {
-            //std::cout << "test" << std::endl;
-
-                //for(int ind=0; ind<hole.size(); ++ind)
-                for(int ind=0; ind<hole.size(); ++ind)
-                {
-                    if(tmpHole[i]==hole[ind])
-                    {
-//                         std::cout << "tmpHole["<< i <<"] = " << tmpHole[i]  << std::endl;
-                        v0=vertexHole[ind];
-                        v1=vertexHole[ind+1];
-                        v2=vertexHole[ind+2];
-
-                        sv0=tmpHole[i];
-                        sv1=tmpHole[i+1];
-                        sv2=tmpHole[i+2];
-
-//                        std::cout << ind << std::endl;
-
-
-
-                        Vector3f GV1 = geoCenter + v1;
-                        Vector3f GV0 = geoCenter + v0;
-                        Vector3f GV2 = geoCenter + v2;
-
-                        if( (GV1.norm() < GV0.norm()) && (GV1.norm() < GV2.norm()) )
-                           {
-//                            std::cout << "test" << std::endl;
-                            isEar=true;
-                            vStart=v0;
-                           }
-
-
-                        ind=hole.size();
-
-
-                    }
-
-
-                }
-
-                if(isEar==false)
-                    i++;
-
-        }
-
-
-        if (isEar==true)
-        {
-            mIndices.push_back(Vector3i(sv0.idx(), sv1.idx(), sv2.idx()));
-//            std::cout << sv0.idx()<< std::endl;
-//            std::cout << sv1.idx() << std::endl;
-//            std::cout <<sv2.idx() << std::endl<<std::endl;
-            vector<Surface_mesh::Vertex> newHole;
-            for (int j=0; j<tmpHole.size();++j)
-            {
-                if(j!=(i+1))
-                    newHole.push_back(tmpHole[j]);
-            }
-
-            //std::cout << tmpHole.size() << std::endl;
-            tmpHole=newHole;
-            //std::cout << tmpHole.size() << std::endl;
-            //std::cout << "test" << std::endl;
-            i=0;
-
-            isEar==false;
-
-        }
-//std::cout << tmpHole.size() << std::endl;
-
-
-
-//break;
-
-
-}
-
-
-
-
-
-}
-
-
+//********
 
 Vector3f getCoordVertex(Surface_mesh::Vertex v, vector<Surface_mesh::Vertex> &vert, vector<Vector3f> &coord)
 {
@@ -653,7 +476,7 @@ Vector3f getCoordVertex(Surface_mesh::Vertex v, vector<Surface_mesh::Vertex> &ve
     return vector;
 }
 
-
+//********
 Vector3f calcGeoCenter(vector<Surface_mesh::Vertex> &hole, vector<Surface_mesh::Vertex> &vert, vector<Vector3f> &coord)
 {
     Vector3f G(0.,0.,0.);
@@ -670,6 +493,7 @@ Vector3f calcGeoCenter(vector<Surface_mesh::Vertex> &hole, vector<Surface_mesh::
 
 }
 
+//********
 bool isInTriangle(Vector3f& A, Vector3f& B, Vector3f& C, Vector3f& M)
 {
     Vector3f AB = B-A;
@@ -699,7 +523,7 @@ bool isInTriangle(Vector3f& A, Vector3f& B, Vector3f& C, Vector3f& M)
 
 
 
-
+//*********
 bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Vertex& v2,
            vector<Surface_mesh::Vertex> &vert , vector<Vector3f> &coord, Vector3f& G,
            vector<Surface_mesh::Vertex> &hole)
@@ -781,6 +605,7 @@ bool isEar(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Ver
 
 }
 
+//**********
 void twoNextVert(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mesh::Vertex& v2, vector<Surface_mesh::Vertex> &hole)
 {
     int ind;
@@ -813,7 +638,7 @@ void twoNextVert(Surface_mesh::Vertex& v0, Surface_mesh::Vertex& v1, Surface_mes
         }
     }
 }
-
+//*********
 void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
 {
     //vector<Surface_mesh::Vertex> hole;
@@ -913,7 +738,7 @@ void Mesh::earClimpy(vector<Surface_mesh::Vertex> &hole)
 
 }
 
-
+//Réparation des trous***********************************************
 void Mesh::fillHole(int choix)
 {
     detectHole();
@@ -933,7 +758,7 @@ void Mesh::fillHole(int choix)
     init(mCurrentShader);
 }
 
-
+//*******************************************************************
 
 
 

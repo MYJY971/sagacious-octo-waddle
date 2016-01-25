@@ -78,19 +78,9 @@ void initGL()
 
     Mesh* mesh = new Mesh();
     //mesh->load(PGHP_DIR"/data/PhantomUgly.obj");
-
-    //mesh->load(PGHP_DIR"/data/Kate_fur.obj");
     //mesh->load(PGHP_DIR"/data/PhantomLite.obj");
-    //mesh->load(PGHP_DIR"/data/bunny_stanford.obj");
-    //mesh->load(PGHP_DIR"/data/sphere.obj");
     //mesh->load(PGHP_DIR"/data/cube.obj");
     mesh->load(PGHP_DIR"/data/ObjConnexe.obj");
-
-    //mesh->load(PGHP_DIR"/data/sphere2.obj");
-    //mesh->load(PGHP_DIR"/data/trouComplexe5.obj");
-    //mesh->load(PGHP_DIR"/data/icosphere_hole.obj");
-
-
     mesh->makeUnitary();
     mesh->init(&mBlinn);
     mMeshes.push_back(mesh);
@@ -118,6 +108,19 @@ void initGL()
     sphere->makeUnitary();
     sphere->init(&mBlinn);
     mMeshes.push_back(sphere);
+    //cube------------
+    Mesh* cube = new Mesh();
+    cube->load(PGHP_DIR"/data/cube.obj");
+    cube->makeUnitary();
+    cube->init(&mBlinn);
+    mMeshes.push_back(cube);
+    //---------------------
+    //2cube------------
+    Mesh* twoCubes = new Mesh();
+    twoCubes->load(PGHP_DIR"/data/twoCubes.obj");
+    twoCubes->makeUnitary();
+    twoCubes->init(&mBlinn);
+    mMeshes.push_back(twoCubes);
     //---------------------
     mCurrentMesh = mMeshes.size()-1;
 
@@ -157,9 +160,9 @@ void render(GLFWwindow* window)
     Matrix3f normal_matrix = (mCamera.computeViewMatrix()*/*pc*//*mesh*/mMeshes[mCurrentMesh]->getTransformationMatrix()).linear().inverse().transpose();
     glUniformMatrix3fv(mBlinn.getUniformLocation("normal_matrix"),1,false,normal_matrix.data());
 
-    //mesh->draw(&mBlinn/*,true*/);
+
     mMeshes[mCurrentMesh]->draw(&mBlinn/*,true*/);
-    //mesh->drawEdges(&mHole);
+
     //pc->draw(&mBlinn);
 
 
@@ -396,8 +399,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
         else if(key == GLFW_KEY_O)
         {
-            //mesh->nbConnexTest(&mBlinn);
-            mMeshes[mCurrentMesh]->nbConnexTest(&mBlinn);
+            mMeshes[mCurrentMesh]->nbConnexTest();
         }
 
 

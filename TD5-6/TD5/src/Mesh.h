@@ -21,6 +21,8 @@ public:
     void earClimpy(std::vector<surface_mesh::Surface_mesh::Vertex> &hole);
     void nbConnexTest();
     void nbConnexTest2();
+    void nbConnexTest3();
+    void nbConnex();
 
     void fillHole(int choix);
 

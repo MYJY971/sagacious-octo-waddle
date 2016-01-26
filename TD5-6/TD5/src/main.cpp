@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string>
+#include <tr1/unordered_map>
 
 #include "OpenGL.h"
 #include <GLFW/glfw3.h>
@@ -399,79 +401,35 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 //              std::cout<< "D="<< D << std::endl;
 ////
-            std::vector< std::vector<int> > Tab;
 
-            std::vector<int> C1,C2;
-            C1.push_back(1);
-            C1.push_back(2);
-            C1.push_back(3);
+            std::tr1::unordered_map<std::string, int> months;
+                months["january"] = 31;
+                months["february"] = 28;
+                months["march"] = 31;
+                months["april"] = 30;
+                months["may"] = 31;
+                months["june"] = 30;
+                months["july"] = 31;
+                months["august"] = 31;
+                months["september"] = 30;
+                months["october"] = 31;
+                months["november"] = 30;
+                months["december"] = 31;
+//                std::cout << "september -> " << months["september"] << std::endl;
+//                std::cout << "april     -> " << months["april"] << std::endl;
+//                std::cout << "december  -> " << months["december"] << std::endl;
+//                std::cout << "february  -> " << months["february"] << std::endl;
+                std::cout << " months.size() ->" <<  months.size() << std::endl;
 
-            Tab.push_back(C1);
+                std::tr1::unordered_map<std::string, int>::const_iterator got = months.find ("input");
 
-            C2.push_back(4);
-            C2.push_back(5);
-            C2.push_back(6);
-            C2.push_back(7);
-            C2.push_back(8);
+                if ( got == months.end() )
+                  std::cout << "not found";
+                else
+                  std::cout << got->first << " is " << got->second;
 
-            int ind=-1;
-            for(int i=0;i<C2.size();++i)
-            {
-                for(int j=0; j<Tab.size();++j)
-                {
+                std::cout << std::endl;
 
-                    int sizeJ=Tab[j].size();
-                    for(int k=0; k<sizeJ ;++k)
-                    {
-                        if(C2[i]==Tab[j][k])
-                        {
-                            std::cout<<"OK"<<std::endl;
-                            ind=j;
-                            k=sizeJ;
-                            j=Tab.size();
-                            i=C2.size();
-                        }
-                    }
-                }
-            }
-
-            if(ind!=-1)
-            {
-                for(int i=0; i<C2.size(); ++i)
-                {
-                    bool in=false;
-                    for(int j=0; j<Tab[ind].size();++j)
-                    {
-                        if(C2[i]==Tab[ind][j])
-                        {
-                            in=true;
-                            j=Tab[ind].size();
-                        }
-
-                    }
-                    if(in==false)
-                        Tab[ind].push_back(C2[i]);
-                }
-            }
-            else
-            {
-                Tab.push_back(C2);
-            }
-
-            std::cout<<"Tab.size()="<<Tab.size()<<std::endl;
-//            std::cout<<Tab[0][0]<<std::endl;
-//            std::cout<<Tab[0][1]<<std::endl;
-//            std::cout<<Tab[0][2]<<std::endl;
-//            std::cout<<Tab[0][3]<<std::endl;
-//            std::cout<<Tab[0][4]<<std::endl;
-//            std::cout<<Tab[0][5]<<std::endl;
-//            std::cout<<Tab[0][6]<<std::endl;
-            for(int i=0; i<Tab.size(); ++i)
-            {
-                std::cout<<"~~~~~~~"<<std::endl;
-                for(int j=0; j<Tab[i].size();++j)
-                    std::cout<<Tab[i][j]<<std::endl;
-            }
 
 
 
@@ -480,8 +438,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
         else if(key == GLFW_KEY_O)
         {
-            mMeshes[mCurrentMesh]->nbConnexTest();
-            mMeshes[mCurrentMesh]->displayConnex();
+            mMeshes[mCurrentMesh]->nbConnex();
+            //mMeshes[mCurrentMesh]->displayConnex();
         }
 
 

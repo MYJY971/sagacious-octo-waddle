@@ -388,16 +388,90 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 //                std::cout<< "N appartient à ABC" << std::endl;
 //            else
 //                std::cout<< "N n'appartient pas à ABC" << std::endl;
+////
+//              Vector3f A(1,0);
+//              Vector3f B(0,1);
 
-              Vector3f A(1,0);
-              Vector3f B(0,1);
+//              Vector3f C = A.cross(B);
+//              Vector3f D = B.cross(A);
 
-              Vector3f C = A.cross(B);
-              Vector3f D = B.cross(A);
+//              std::cout<< "C="<< C << std::endl<<std::endl;
 
-              std::cout<< "C="<< C << std::endl<<std::endl;
+//              std::cout<< "D="<< D << std::endl;
+////
+            std::vector< std::vector<int> > Tab;
 
-              std::cout<< "D="<< D << std::endl;
+            std::vector<int> C1,C2;
+            C1.push_back(1);
+            C1.push_back(2);
+            C1.push_back(3);
+
+            Tab.push_back(C1);
+
+            C2.push_back(4);
+            C2.push_back(5);
+            C2.push_back(6);
+            C2.push_back(7);
+            C2.push_back(8);
+
+            int ind=-1;
+            for(int i=0;i<C2.size();++i)
+            {
+                for(int j=0; j<Tab.size();++j)
+                {
+
+                    int sizeJ=Tab[j].size();
+                    for(int k=0; k<sizeJ ;++k)
+                    {
+                        if(C2[i]==Tab[j][k])
+                        {
+                            std::cout<<"OK"<<std::endl;
+                            ind=j;
+                            k=sizeJ;
+                            j=Tab.size();
+                            i=C2.size();
+                        }
+                    }
+                }
+            }
+
+            if(ind!=-1)
+            {
+                for(int i=0; i<C2.size(); ++i)
+                {
+                    bool in=false;
+                    for(int j=0; j<Tab[ind].size();++j)
+                    {
+                        if(C2[i]==Tab[ind][j])
+                        {
+                            in=true;
+                            j=Tab[ind].size();
+                        }
+
+                    }
+                    if(in==false)
+                        Tab[ind].push_back(C2[i]);
+                }
+            }
+            else
+            {
+                Tab.push_back(C2);
+            }
+
+            std::cout<<"Tab.size()="<<Tab.size()<<std::endl;
+//            std::cout<<Tab[0][0]<<std::endl;
+//            std::cout<<Tab[0][1]<<std::endl;
+//            std::cout<<Tab[0][2]<<std::endl;
+//            std::cout<<Tab[0][3]<<std::endl;
+//            std::cout<<Tab[0][4]<<std::endl;
+//            std::cout<<Tab[0][5]<<std::endl;
+//            std::cout<<Tab[0][6]<<std::endl;
+            for(int i=0; i<Tab.size(); ++i)
+            {
+                std::cout<<"~~~~~~~"<<std::endl;
+                for(int j=0; j<Tab[i].size();++j)
+                    std::cout<<Tab[i][j]<<std::endl;
+            }
 
 
 
@@ -407,7 +481,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         else if(key == GLFW_KEY_O)
         {
             mMeshes[mCurrentMesh]->nbConnexTest();
-            //mMeshes[mCurrentMesh]->displayConnex();
+            mMeshes[mCurrentMesh]->displayConnex();
         }
 
 

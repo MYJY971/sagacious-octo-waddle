@@ -124,90 +124,90 @@ void Mesh::nbConnexTest2()
     for(vit=mHalfEdge.vertices_begin(); vit!=mHalfEdge.vertices_end(); ++vit)
     {
         //////////////////////////////////
-        cout <<"~~~~~~~~~~~~~~"<< endl;
-        cout<< "->" <<*vit<<":"<<endl;
-
-        vvit=vvend=mHalfEdge.vertices(*vit);
-        do{
-            v=*vvit;
-            cout<<v<<endl;
-            ++vvit;
-          }while(vvit!=vvend);
-
-////////////////////////////////////////////////////////////
-//        isCon=false;
+//        cout <<"~~~~~~~~~~~~~~"<< endl;
+//        cout<< "->" <<*vit<<":"<<endl;
 
 //        vvit=vvend=mHalfEdge.vertices(*vit);
-//        //v=*vvit;
+//        do{
+//            v=*vvit;
+//            cout<<v<<endl;
+//            ++vvit;
+//          }while(vvit!=vvend);
 
-//        if(vit==mHalfEdge.vertices_begin())
-//        {
-//            component.push_back(*vit);
+////////////////////////////////////////////////////////////
+        isCon=false;
 
-//            do{
-//                v=*vvit;
-//                component.push_back(v);
-//                ++vvit;
-//            }while(vvit!=vvend);
+        vvit=vvend=mHalfEdge.vertices(*vit);
+        //v=*vvit;
 
-//        }
+        if(vit==mHalfEdge.vertices_begin())
+        {
+            component.push_back(*vit);
 
-//        else
-//        {
-//           tmpComp.push_back(*vit);
-//           do{
-//               v=*vvit;
-//               tmpComp.push_back(v);
-//               ++vvit;
-//           }while(vvit!=vvend);
+            do{
+                v=*vvit;
+                component.push_back(v);
+                ++vvit;
+            }while(vvit!=vvend);
 
+        }
 
-//           for(int i=0; i<component.size();++i)
-//           {
-
-//               for(int j=0; j<tmpComp.size();++j)
-//               {
-
-//                   if(component[i]==tmpComp[j])
-//                   {
-//                       isCon=true;
-//                       j=tmpComp.size();
-//                       i=component.size();
-//                   }
-//               }
-//           }
-
-//           if(isCon==true)
-//           {
-//                for(int j=0; j<tmpComp.size();++j)
-//                {
-//                    in=false;
-
-//                    for (int i=0; i<component.size();++i)
-//                    {
-//                        if(tmpComp[j]==component[i])
-//                        {
-//                            in=true;
-//                            i=component.size();
-//                        }
-//                    }
-
-//                    if(in==false)
-//                        component.push_back(tmpComp[j]);
-
-//                }
-//           }
-//           else
-//           {
-//               mConnex.push_back(component);
-//               component=tmpComp;
-
-//           }
-//           tmpComp.erase(tmpComp.begin(),tmpComp.end());
+        else
+        {
+           tmpComp.push_back(*vit);
+           do{
+               v=*vvit;
+               tmpComp.push_back(v);
+               ++vvit;
+           }while(vvit!=vvend);
 
 
+           for(int i=0; i<component.size();++i)
+           {
 
-//        }
+               for(int j=0; j<tmpComp.size();++j)
+               {
+
+                   if(component[i]==tmpComp[j])
+                   {
+                       isCon=true;
+                       j=tmpComp.size();
+                       i=component.size();
+                   }
+               }
+           }
+
+           if(isCon==true)
+           {
+                for(int j=0; j<tmpComp.size();++j)
+                {
+                    in=false;
+
+                    for (int i=0; i<component.size();++i)
+                    {
+                        if(tmpComp[j]==component[i])
+                        {
+                            in=true;
+                            i=component.size();
+                        }
+                    }
+
+                    if(in==false)
+                        component.push_back(tmpComp[j]);
+
+                }
+           }
+           else
+           {
+               mConnex.push_back(component);
+               component=tmpComp;
+
+           }
+           tmpComp.erase(tmpComp.begin(),tmpComp.end());
+
+
+
+        }
 
             ////////////////////////////////////////////
 
@@ -253,32 +253,20 @@ void Mesh::nbConnexTest()
     Surface_mesh::Vertex v,v0,v1,v2;
 
 
-    bool isCon,in, in0, in1;
+    bool isCon,in, in0, in1,combinate;
     //int ind;
 
 
     for(vit=mHalfEdge.vertices_begin(); vit!=mHalfEdge.vertices_end(); ++vit)
     {
-//////////////////////////////////////////////////////////////
-//        cout <<"~~~~~~~~~~~~~~"<< endl;
-//        cout<< "->" <<*vit<<":"<<endl;
-
-//        vvit=vvend=mHalfEdge.vertices(*vit);
-//        do{
-//            v=*vvit;
-//            cout<<v<<endl;
-//            ++vvit;
-//          }while(vvit!=vvend);
-
-////////////////////////////////////////////////////////////
         isCon=false;
+        combinate=false;
 
         vvit=vvend=mHalfEdge.vertices(*vit);
         //v=*vvit;
 
         if(vit==mHalfEdge.vertices_begin())
         {
-
             component.push_back(*vit);
 
             do{
@@ -286,14 +274,11 @@ void Mesh::nbConnexTest()
                 component.push_back(v);
                 ++vvit;
             }while(vvit!=vvend);
-
             stockVertices=component;
-            mConnex.push_back(component);
         }
 
         else
         {
-
            tmpComp.push_back(*vit);
            do{
                v=*vvit;
@@ -301,83 +286,82 @@ void Mesh::nbConnexTest()
                ++vvit;
            }while(vvit!=vvend);
 
-            //Verifie si connecté à un sommet déjà parcouru
-           int ind=-1;
-           for(int i=0; i<mConnex.size();++i)
+
+           for(int i=0; i<stockVertices.size();++i)
            {
 
-                for(int j=0;j<mConnex[i].size();++j)
+               for(int j=0; j<tmpComp.size();++j)
+               {
+
+                   if(stockVertices[i]==tmpComp[j])
+                   {
+                       isCon=true;
+                       j=tmpComp.size();
+                       i=stockVertices.size();
+                   }
+               }
+           }
+
+           if(isCon==true)
+           {
+                for(int j=0; j<tmpComp.size();++j)
                 {
+                    in=false;
 
-                    for(int k=0; k<tmpComp.size();++k)
+                    for (int i=0; i<component.size();++i)
                     {
-
-                        if(mConnex[i][j]==tmpComp[k])
+                        if(tmpComp[j]==component[i])
                         {
-                            ind=i;
-                            k=tmpComp.size();
-//                          j=mConnex[i].size();
-//                          i=mConnex.size();
+                            in=true;
+                            i=component.size();
                         }
-
                     }
 
-                    if(ind!=-1)
-                        break;
-                }
-                if(ind!=-1)
-                    break;
-           }
-
-           //si connecté alors remplir la composante concernée
-           if(ind!=-1)
-           {
-
-             for(int i=0; i<tmpComp.size();++i)
-             {
-                 in=false;
-
-                 for(int j=0; j<mConnex[ind].size();++j)
-                 {
-                    if(tmpComp[i]==mConnex[ind][j])
+                    if(in==false)
                     {
-                        in=true;
-                        j=mConnex[ind].size();
+                        component.push_back(tmpComp[j]);
+                        stockVertices.push_back(tmpComp[i]);
                     }
-                 }
-
-                 if(in==false)
-                 {
-                     mConnex[ind].push_back(tmpComp[i]);
-                 }
-
-             }
+                }
            }
-           else //Sinon, création d'une nouvelle composante
+           else
            {
 
-            mConnex.push_back(tmpComp);
+//               for(int i=0; i<stockVertices.size();++i)
+//               {
 
+//                   for(int j=0; j<tmpComp.size();++j)
+//                   {
+
+//                       if(stockVertices[i]==tmpComp[j])
+//                       {
+//                           combinate=true;
+//                           j=tmpComp.size();
+//                           i=component.size();
+//                       }
+//                   }
+//               }
+
+//               if(combinate==true)
+//               {
+
+//               }
+//               else
+               //{
+                    mConnex.push_back(component);
+                    component=tmpComp;
+               //}
            }
-
            tmpComp.erase(tmpComp.begin(),tmpComp.end());
-
-
-
-           //////
-
-
 
 
 
         }
 
-            ////////////////////////////////////////////
 
 
     }
-    //mConnex.push_back(component);
-    //cout <<"~~~~~~~~~~~~~~"<< endl;
+    mConnex.push_back(component);
     cout <<"nb composantes connexes :"<< mConnex.size() << endl;
 
 //    //color
